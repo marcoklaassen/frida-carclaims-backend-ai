@@ -1,0 +1,1 @@
+Die FRIDA Schaden API - ermöglicht es Nutzer:innen im Schadenfall die wichtigsten Versicherungs- und Unfalldaten über eine Schadenplattform direkt an den Versicherer zu übertragen und den Schaden damit offiziel zu melden.
