@@ -55,6 +55,10 @@ oc delete pod whisper-model-copy
 oc rollout restart deployment/whisper -n frida-carclaims-test
 ```
 
+## Cluster-internal only
+
+Whisper is exposed via a **ClusterIP Service** (`whisper:8000`) — no OpenShift Route. Only the voice-backend pod talks to Whisper inside the cluster.
+
 ## Backend connection
 
 Set on the voice-backend deployment:

@@ -8,7 +8,7 @@ This `gitops/` folder lives **in the application repository** on purpose: the st
 |-----------|---------------------|
 | Backend (this app) | `gitops/test/backend/` → `quay.io/mklaasse/frida-carclaims-backend-ai` |
 | LiteLLM / Qwen (LiteMaas) | External managed service — URL/key via ConfigMap + Secret |
-| Whisper (ramalama) | `gitops/test/whisper/` |
+| Whisper (ramalama) | `gitops/test/whisper/` — ClusterIP only, no public Route |
 
 ## Production
 
@@ -46,10 +46,10 @@ gitops/test/
 ## Verify
 
 ```bash
-# Whisper
-kubectl -n frida-carclaims-test port-forward svc/whisper 8000:8000
-
-# Backend API
+# Backend API (public Route)
 oc get route voice-backend -n frida-carclaims-test
 curl -sS "https://<route-host>/q/openapi"
+
+# Whisper (cluster-internal — debug only)
+kubectl -n frida-carclaims-test port-forward svc/whisper 8000:8000
 ```
