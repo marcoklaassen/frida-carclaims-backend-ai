@@ -116,6 +116,7 @@ public class WhisperCppTranscriptionModel implements AudioTranscriptionModel {
         writeField(out, "file", audioBytes, filename, "application/octet-stream");
         writeField(out, "response_format", "json");
         writeField(out, "temperature", "0.0");
+        writeField(out, "translate", "false");
         if (language != null && !language.isBlank()) {
             writeField(out, "language", language);
         }

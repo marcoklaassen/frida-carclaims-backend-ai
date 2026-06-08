@@ -37,7 +37,8 @@ public class VoiceExtractionService {
         Claimsdata extracted = extractClaims(transcript, currentStateJson);
         Claimsdata merged = claimsDataMerger.merge(currentState, extracted);
 
-        LOG.info("Voice extraction completed: transcriptLength=" + transcript.length());
+        LOG.info("Voice extraction completed: transcriptLength=" + transcript.length()
+                + ", transcript=" + abbreviate(transcript, 200));
 
         return new VoiceExtractionResponse(transcript, merged);
     }
@@ -62,6 +63,17 @@ public class VoiceExtractionService {
     private Claimsdata extractClaims(String transcript, String currentStateJson) {
         String state = currentStateJson != null && !currentStateJson.isBlank() ? currentStateJson : "{}";
         return claimsFieldExtractor.extractFields(transcript, state);
+    }
+
+    private static String abbreviate(String text, int maxLength) {
+        if (text == null) {
+            return "";
+        }
+        String singleLine = text.replace('\n', ' ').trim();
+        if (singleLine.length() <= maxLength) {
+            return singleLine;
+        }
+        return singleLine.substring(0, maxLength) + "...";
     }
 
     private Claimsdata parseCurrentState(String currentStateJson) {
