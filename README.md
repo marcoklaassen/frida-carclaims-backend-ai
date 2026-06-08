@@ -27,12 +27,13 @@ export CHAT_MODEL=Qwen3.6-35B-A3B
 
 # whisper.cpp server — must be the full /inference endpoint, not OpenAI /v1/
 export WHISPER_BASE_URL=http://localhost:51060/inference
-export WHISPER_API_KEY=foo
+# export WHISPER_API_KEY=your-key   # omit when whisper.cpp has no auth
 ```
 
 `WHISPER_BASE_URL` must point at the whisper.cpp **`/inference`** endpoint. The backend uses the whisper.cpp multipart API (`file`, `response_format=json`, `language`), not OpenAI `/v1/audio/transcriptions`. Langchain4j's OpenAI transcription client is not used because it is unsupported in Quarkus and incompatible with whisper.cpp.
 
-Only `WHISPER_BASE_URL` is required at startup. The API key is optional (whisper.cpp does not require auth).
+If `WHISPER_API_KEY` is set, requests include `Authorization: Bearer <key>`. If it is unset or blank, no auth header is sent.
+
 
 ### Model capabilities
 
@@ -138,6 +139,36 @@ Native build:
 ```
 
 Tests mock the service layer; no live LiteLLM or Whisper calls in CI.
+
+## CI: Native image on Quay.io
+
+The workflow [`.github/workflows/native-quay.yml`](.github/workflows/native-quay.yml) runs on pushes to `main`/`master` and on manual dispatch. It:
+
+1. Runs unit tests
+2. Builds a Quarkus native binary (`-Dnative` with container build)
+3. Packages it with [`src/main/docker/Dockerfile.native`](src/main/docker/Dockerfile.native)
+4. Pushes to `quay.io/mklaasse/frida-carclaims-backend-ai`
+
+### Required GitHub secrets
+
+| Secret | Value |
+|--------|-------|
+| `QUAY_USERNAME` | Your Quay.io username (`mklaasse`) or robot account name |
+| `QUAY_PASSWORD` | Quay.io password or robot account token |
+
+Create the repository `frida-carclaims-backend-ai` under your Quay.io account before the first push.
+
+Pull the image locally:
+
+```shell
+docker pull quay.io/mklaasse/frida-carclaims-backend-ai:latest
+docker run --rm -p 8080:8080 \
+  -e LITELLM_BASE_URL=... \
+  -e LITELLM_API_KEY=... \
+  -e WHISPER_BASE_URL=... \
+  -e WHISPER_API_KEY=... \
+  quay.io/mklaasse/frida-carclaims-backend-ai:latest
+```
 
 ## Security
 
