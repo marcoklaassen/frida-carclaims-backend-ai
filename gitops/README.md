@@ -24,7 +24,7 @@ oc create secret generic voice-backend-secrets -n frida-carclaims-test \
 # 2. Deploy Whisper + backend (or apply components separately)
 oc apply -k gitops/test/
 
-# 3. Load the Whisper model into the PVC (once) — see gitops/test/whisper/README.md
+# 3. Wait for Whisper init container to download the model (~466 MB) — see gitops/test/whisper/README.md
 ```
 
 Deploy components individually:

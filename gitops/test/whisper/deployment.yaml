@@ -15,6 +15,26 @@ spec:
       labels:
         app: whisper
     spec:
+      initContainers:
+        - name: download-model
+          image: curlimages/curl:8.12.1
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              MODEL=/models/ggml-small.bin
+              if [ -s "$MODEL" ]; then
+                echo "Model already present: $(wc -c < "$MODEL") bytes"
+                exit 0
+              fi
+              echo "Downloading ggml-small.bin from Hugging Face..."
+              curl -fL --retry 3 --retry-delay 5 -o "$MODEL" \
+                https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin
+              echo "Downloaded: $(wc -c < "$MODEL") bytes"
+          volumeMounts:
+            - name: whisper-model
+              mountPath: /models
       containers:
         - name: whisper
           image: quay.io/ramalama/ramalama-whisper-server@sha256:377f9a91ba0030548bca8a3845be1c8396bd2255a0aae01e1be43845b1ee5f1e
@@ -30,8 +50,7 @@ spec:
               value: "8000"
           volumeMounts:
             - name: whisper-model
-              mountPath: /models/ggml-small.bin
-              subPath: ggml-small.bin
+              mountPath: /models
               readOnly: true
           resources:
             requests:
@@ -40,10 +59,14 @@ spec:
             limits:
               cpu: "2"
               memory: 4Gi
+          startupProbe:
+            tcpSocket:
+              port: 8000
+            failureThreshold: 30
+            periodSeconds: 10
           readinessProbe:
             tcpSocket:
               port: 8000
-            initialDelaySeconds: 10
             periodSeconds: 10
           livenessProbe:
             tcpSocket:
