@@ -4,3 +4,4 @@ kind: Kustomization
 resources:
   - whisper
   - backend
+  - frontend

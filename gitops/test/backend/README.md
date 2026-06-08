@@ -45,12 +45,10 @@ Or deploy everything (Whisper + backend):
 oc apply -k gitops/test/
 ```
 
-## API
+## API access
 
-After deploy, the OpenShift Route exposes:
+Cluster-internal Service: `http://frida-carclaims-test:8080`
 
-`POST /api/voice/extract` (multipart: `audio`, optional `currentState`, optional `language`)
+No Route on the backend. The frontend nginx proxies `/api/` to this Service.
 
-```bash
-oc get route voice-backend -n frida-carclaims-test -o jsonpath='https://{.spec.host}{"\n"}'
-```
+Public endpoint: `POST https://frida-carclaims-test.apps.ocp4.klaassen.click/api/voice/extract`

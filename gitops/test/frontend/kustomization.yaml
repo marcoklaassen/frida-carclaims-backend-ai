@@ -4,6 +4,6 @@ kind: Kustomization
 namespace: frida-carclaims-test
 
 resources:
-  - configmap.yaml
   - deployment.yaml
   - service.yaml
+  - route.yaml
