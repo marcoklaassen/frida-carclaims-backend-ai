@@ -1,0 +1,61 @@
+# Maps frontend stepKey (sessionStorage) to allowed Claimsdata JSON paths for voice extraction.
+# Prefixes ending with "." match nested paths (e.g. policyholder. → policyholder.vehicleReg).
+steps:
+  carclaimsDetails:
+    hints: |
+      - This step captures the accident (Unfall), not the policyholder home address.
+      - "Ort", "Straße", "PLZ" on this page mean accidentCity, accidentStreetName, accidentPostalCode.
+      - Map spoken German dates to YYYY-MM-DD and times to HH:mm:ss.
+    allowedPathPrefixes:
+      - language
+      - accident
+
+  insurance-holder-a:
+    hints: |
+      - Versicherungsnehmer A: policyholder and own vehicle/insurance data.
+      - Home address phrases ("Ich wohne in …") map to policyholder.personalInformation.*.
+    allowedPathPrefixes:
+      - policyholder.
+
+  driver-a:
+    hints: |
+      - Fahrer A (own driver): vehicleDriver.* including damage cause and damaged parts.
+      - If the speaker says they drove, also fill vehicleDriver.personalInformation.*.
+    allowedPathPrefixes:
+      - vehicleDriver.
+
+  injuredDetails:
+    hints: |
+      - Verletzte Personen: injuredPerson (tri-state) and injuredPersonNumber (count as string).
+    allowedPathPrefixes:
+      - injuredPerson
+      - injuredPersonNumber
+
+  miscellaneousDamages:
+    hints: |
+      - Weitere Sachschäden: hasVehicleDamage (tri-state) and vehicleDamageDescription.
+    allowedPathPrefixes:
+      - hasVehicleDamage
+      - vehicleDamageDescription
+
+  insurance-holder-b:
+    hints: |
+      - Only populate when the transcript explicitly mentions the other party (Unfallgegner B).
+      - Versicherungsnehmer B → otherPolicyholder.*
+    allowedPathPrefixes:
+      - otherPolicyholder.
+
+  driver-b:
+    hints: |
+      - Only populate when the transcript explicitly mentions the other driver (Fahrer B).
+      - Fahrer B → otherVehicleDriver.*
+    allowedPathPrefixes:
+      - otherVehicleDriver.
+
+  witness:
+    hints: |
+      - Zeugen: witnessExists, witnessCount, witness[] with personalInformation per witness.
+    allowedPathPrefixes:
+      - witnessExists
+      - witnessCount
+      - witness

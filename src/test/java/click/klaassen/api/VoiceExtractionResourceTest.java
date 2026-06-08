@@ -25,7 +25,7 @@ class VoiceExtractionResourceTest {
         Claimsdata claimsData = new Claimsdata();
         claimsData.setAccidentCity("Bedburg");
 
-        when(voiceExtractionService.extract(any(byte[].class), anyString(), isNull(), isNull()))
+        when(voiceExtractionService.extract(any(byte[].class), anyString(), isNull(), isNull(), isNull()))
                 .thenReturn(new VoiceExtractionResponse("Unfall in Bedburg", claimsData));
 
         given()

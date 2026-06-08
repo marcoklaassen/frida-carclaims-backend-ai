@@ -31,10 +31,11 @@ public class VoiceExtractionService {
     @Inject
     ObjectMapper objectMapper;
 
-    public VoiceExtractionResponse extract(byte[] audioBytes, String mimeType, String currentStateJson, String language) {
+    public VoiceExtractionResponse extract(
+            byte[] audioBytes, String mimeType, String currentStateJson, String language, String stepKey) {
         String transcript = transcribe(audioBytes, mimeType, language);
         Claimsdata currentState = parseCurrentState(currentStateJson);
-        Claimsdata extracted = extractClaims(transcript, currentStateJson);
+        Claimsdata extracted = extractClaims(transcript, currentStateJson, stepKey);
         Claimsdata merged = claimsDataMerger.merge(currentState, extracted);
 
         LOG.info("Voice extraction completed: transcriptLength=" + transcript.length()
@@ -60,9 +61,9 @@ public class VoiceExtractionService {
         }
     }
 
-    private Claimsdata extractClaims(String transcript, String currentStateJson) {
+    private Claimsdata extractClaims(String transcript, String currentStateJson, String stepKey) {
         String state = currentStateJson != null && !currentStateJson.isBlank() ? currentStateJson : "{}";
-        return claimsFieldExtractor.extractFields(transcript, state);
+        return claimsFieldExtractor.extractFields(transcript, state, stepKey);
     }
 
     private static String abbreviate(String text, int maxLength) {

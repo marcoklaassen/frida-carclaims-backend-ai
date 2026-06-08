@@ -25,7 +25,8 @@ public class VoiceExtractionResource {
     public VoiceExtractionResponse extract(
             @RestForm("audio") FileUpload audio,
             @RestForm("currentState") String currentState,
-            @RestForm("language") String language) throws IOException {
+            @RestForm("language") String language,
+            @RestForm("stepKey") String stepKey) throws IOException {
 
         if (audio == null || audio.uploadedFile() == null) {
             throw new jakarta.ws.rs.BadRequestException("Missing required audio part");
@@ -37,6 +38,6 @@ public class VoiceExtractionResource {
         }
 
         String mimeType = audio.contentType() != null ? audio.contentType() : "application/octet-stream";
-        return voiceExtractionService.extract(audioBytes, mimeType, currentState, language);
+        return voiceExtractionService.extract(audioBytes, mimeType, currentState, language, stepKey);
     }
 }

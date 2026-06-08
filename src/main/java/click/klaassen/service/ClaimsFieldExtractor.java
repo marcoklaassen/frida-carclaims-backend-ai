@@ -12,7 +12,6 @@ import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.openai.OpenAiChatRequestParameters;
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.beans.Introspector;
@@ -20,12 +19,14 @@ import java.beans.PropertyDescriptor;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 @ApplicationScoped
 public class ClaimsFieldExtractor {
 
     private static final Logger LOG = Logger.getLogger(ClaimsFieldExtractor.class.getName());
+    private static final double EXTRACTION_TEMPERATURE = 0.1;
 
     @Inject
     ClaimsSchemaKnowledge schemaKnowledge;
@@ -36,18 +37,14 @@ public class ClaimsFieldExtractor {
     @Inject
     ObjectMapper objectMapper;
 
-    private String systemPrompt;
+    private final ConcurrentHashMap<String, String> systemPromptCache = new ConcurrentHashMap<>();
 
-    @PostConstruct
-    void init() {
-        systemPrompt = ClaimsSchemaPrompt.EXTRACTION_RULES + schemaKnowledge.getSchemaPromptSection();
-    }
-
-    public Claimsdata extractFields(String transcript, String currentState) {
+    public Claimsdata extractFields(String transcript, String currentState, String stepKey) {
         String state = currentState != null && !currentState.isBlank() ? currentState : "{}";
+        String systemPrompt = systemPromptForStep(stepKey);
         String userPrompt = """
                 Transcript: %s
-                Current form state (JSON, may be empty): %s
+                Current form state (JSON, context only — do not copy unmentioned fields): %s
                 Return only a JSON object with exact FRIDA Claimsdata field names for fields mentioned in the transcript.
                 """.formatted(transcript, state);
 
@@ -55,6 +52,7 @@ public class ClaimsFieldExtractor {
             ChatResponse response = chatModel.chat(ChatRequest.builder()
                     .messages(SystemMessage.from(systemPrompt), UserMessage.from(userPrompt))
                     .parameters(OpenAiChatRequestParameters.builder()
+                            .temperature(EXTRACTION_TEMPERATURE)
                             .responseFormat(ResponseFormat.JSON)
                             .customParameters(Map.of(
                                     "chat_template_kwargs", Map.of("enable_thinking", false)))
@@ -62,7 +60,8 @@ public class ClaimsFieldExtractor {
                     .build());
 
             String text = response.aiMessage().text();
-            LOG.info("LLM extraction response length=" + (text != null ? text.length() : 0));
+            LOG.info("LLM extraction response length=" + (text != null ? text.length() : 0)
+                    + ", stepKey=" + (stepKey != null ? stepKey : "(none)"));
             String json = ClaimsJsonParser.extractJson(text);
             logUnknownTopLevelFields(json);
             return ClaimsJsonParser.parse(objectMapper, json);
@@ -72,6 +71,12 @@ public class ClaimsFieldExtractor {
         } catch (Exception e) {
             throw new UpstreamAiException("Claims extraction failed", e);
         }
+    }
+
+    String systemPromptForStep(String stepKey) {
+        String cacheKey = stepKey != null && !stepKey.isBlank() ? stepKey.trim() : "";
+        return systemPromptCache.computeIfAbsent(cacheKey, key -> ClaimsSchemaPrompt.EXTRACTION_RULES
+                + schemaKnowledge.getSchemaPromptSection(key.isEmpty() ? null : key));
     }
 
     private void logUnknownTopLevelFields(String json) {

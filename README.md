@@ -70,6 +70,7 @@ Transcribes audio and extracts claim fields for the frontend form.
 | `audio` | yes | Audio file (`audio/webm`, `audio/wav`, `audio/mpeg`, etc.) |
 | `currentState` | no | JSON string with existing partial `Claimsdata` form state |
 | `language` | no | Whisper language hint (default: `de`) |
+| `stepKey` | no | Frontend form step id (e.g. `carclaimsDetails`, `driver-a`) — scopes LLM extraction to fields on that page |
 
 **Success response (200):**
 
@@ -99,13 +100,14 @@ Only non-null fields are returned in `claimsData`. The frontend should merge thi
 curl -X POST http://localhost:8080/api/voice/extract \
   -F "audio=@recording.webm;type=audio/webm" \
   -F 'currentState={"accidentCity":"Köln"}' \
-  -F "language=de"
+  -F "language=de" \
+  -F "stepKey=carclaimsDetails"
 ```
 
 ## Architecture
 
 1. **Speech-to-text** — whisper.cpp server via `POST /inference` (multipart upload)
-2. **Schema mapping** — Qwen3.6-35B-A3B via LiteLLM with thinking disabled (`enable_thinking: false`) and manual JSON parsing. The system prompt is built at startup from vendored FRIDA schema resources under `src/main/resources/frida/` (`claimsOas.yaml`, `descriptionClaim.md`, `voice-mapping-hints.md`).
+2. **Schema mapping** — Qwen3.6-35B-A3B via LiteLLM with thinking disabled (`enable_thinking: false`), temperature 0.1, and manual JSON parsing. The system prompt is built from vendored FRIDA resources under `src/main/resources/frida/` (`claimsOas.yaml`, `descriptionClaim.md`, `voice-mapping-hints.md`, `step-field-catalog.yaml`, `german-field-synonyms.md`, `voice-extraction-examples.md`). When the frontend sends `stepKey`, only fields for that form step are included in the catalog.
 3. **Merge** — Java `ClaimsDataMerger` deep-merges extracted fields into optional `currentState`
 
 ### Schema resources
@@ -117,7 +119,14 @@ curl -sL "https://raw.githubusercontent.com/FRIDA-api/frida-carclaims-frontend/m
   -o src/main/resources/frida/claimsOas.yaml
 ```
 
-Domain context is taken from [FRIDA-car/descriptionClaim_en.md](https://github.com/FRIDA-api/FRIDA-car/blob/master/descriptionClaim_en.md). Voice disambiguation rules live in `src/main/resources/frida/voice-mapping-hints.md`.
+Domain context is taken from [FRIDA-car/descriptionClaim_en.md](https://github.com/FRIDA-api/FRIDA-car/blob/master/descriptionClaim_en.md). Voice disambiguation rules live in `src/main/resources/frida/voice-mapping-hints.md`. German colloquial phrases and few-shot examples are in `german-field-synonyms.md` and `voice-extraction-examples.md`. Step-to-field mappings are in `step-field-catalog.yaml` (derived from the frontend `reverseDtoMapper.ts` step groupings).
+
+**Keeping prompt content up to date:**
+
+1. Re-sync OAS when the frontend schema changes (command above).
+2. After voice testing sessions, append anonymized transcript → JSON pairs to `voice-extraction-examples.md`.
+3. When UI enum labels change, update `german-field-synonyms.md`.
+4. Rebuild the native image so new resources are bundled (`quarkus.native.resources.includes` in `application.properties`).
 
 ## Packaging
 
