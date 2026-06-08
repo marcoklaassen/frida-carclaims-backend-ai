@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: voice-backend
+  namespace: frida-carclaims-test
+  labels:
+    app: voice-backend
+spec:
+  to:
+    kind: Service
+    name: voice-backend
+  port:
+    targetPort: http
+  tls:
+    termination: edge

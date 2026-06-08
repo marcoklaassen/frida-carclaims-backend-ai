@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voice-backend
+  namespace: frida-carclaims-test
+  labels:
+    app: voice-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: voice-backend
+  template:
+    metadata:
+      labels:
+        app: voice-backend
+    spec:
+      containers:
+        - name: voice-backend
+          image: quay.io/mklaasse/frida-carclaims-backend-ai:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: voice-backend-config
+          env:
+            - name: LITELLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: voice-backend-secrets
+                  key: LITELLM_API_KEY
+            - name: WHISPER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: voice-backend-secrets
+                  key: WHISPER_API_KEY
+                  optional: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 20

@@ -6,9 +6,9 @@ This `gitops/` folder lives **in the application repository** on purpose: the st
 
 | Component | Deployment approach |
 |-----------|---------------------|
-| Backend (this app) | Built by GitHub Actions → `quay.io/mklaasse/frida-carclaims-backend-ai` |
-| LiteLLM / Qwen (LiteMaas) | External managed service — no manifests here |
-| Whisper (ramalama) | Manifests under `gitops/test/whisper/` |
+| Backend (this app) | `gitops/test/backend/` → `quay.io/mklaasse/frida-carclaims-backend-ai` |
+| LiteLLM / Qwen (LiteMaas) | External managed service — URL/key via ConfigMap + Secret |
+| Whisper (ramalama) | `gitops/test/whisper/` |
 
 ## Production
 
@@ -17,22 +17,39 @@ For **production**, do **not** keep cluster manifests in this app repo. Use a **
 ## Test deployment
 
 ```bash
-# 1. Deploy Whisper (namespace, PVC, Deployment, Service, Route)
-kubectl apply -k gitops/test/whisper/
-# or on OpenShift:
-oc apply -k gitops/test/whisper/
+# 1. Create backend secrets (once)
+oc create secret generic voice-backend-secrets -n frida-carclaims-test \
+  --from-literal=LITELLM_API_KEY='sk-...'
 
-# 2. Load the Whisper model into the PVC (once) — see gitops/test/whisper/README.md
+# 2. Deploy Whisper + backend (or apply components separately)
+oc apply -k gitops/test/
 
-# 3. Deploy the backend separately with runtime env vars:
-#    LITELLM_BASE_URL, LITELLM_API_KEY  — LiteMaas service
-#    WHISPER_BASE_URL=http://whisper.frida-carclaims-test.svc.cluster.local:8000/inference
-#    WHISPER_API_KEY                    — only if your Whisper gateway requires auth
+# 3. Load the Whisper model into the PVC (once) — see gitops/test/whisper/README.md
 ```
 
-Verify the inference endpoint after deploy:
+Deploy components individually:
 
 ```bash
+oc apply -k gitops/test/whisper/
+oc apply -k gitops/test/backend/   # requires voice-backend-secrets
+```
+
+## Layout
+
+```
+gitops/test/
+├── kustomization.yaml    # whisper + backend
+├── whisper/
+└── backend/
+```
+
+## Verify
+
+```bash
+# Whisper
 kubectl -n frida-carclaims-test port-forward svc/whisper 8000:8000
-curl -sS -X POST "http://localhost:8000/inference" ...
+
+# Backend API
+oc get route voice-backend -n frida-carclaims-test
+curl -sS "https://<route-host>/q/openapi"
 ```
