@@ -38,6 +38,7 @@ spec:
       containers:
         - name: whisper
           image: quay.io/ramalama/ramalama-whisper-server@sha256:377f9a91ba0030548bca8a3845be1c8396bd2255a0aae01e1be43845b1ee5f1e
+          workingDir: /tmp/whisper
           ports:
             - name: http
               containerPort: 8000
@@ -48,10 +49,14 @@ spec:
               value: "0.0.0.0"
             - name: PORT
               value: "8000"
+            - name: TMPDIR
+              value: /tmp/whisper
           volumeMounts:
             - name: whisper-model
               mountPath: /models
               readOnly: true
+            - name: whisper-tmp
+              mountPath: /tmp/whisper
           resources:
             requests:
               cpu: 500m
@@ -77,3 +82,5 @@ spec:
         - name: whisper-model
           persistentVolumeClaim:
             claimName: whisper-model
+        - name: whisper-tmp
+          emptyDir: {}

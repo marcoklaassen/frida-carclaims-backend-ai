@@ -10,6 +10,19 @@ An **init container** downloads `ggml-small.bin` (~466 MB) from Hugging Face int
 
 The PVC is mounted at `/models`; the Whisper container reads `/models/ggml-small.bin`.
 
+### Troubleshooting ffmpeg `Error opening input file whisper-server-*.wav`
+
+The whisper-server converts browser audio (webm) via ffmpeg and writes temp files to `--tmp-dir` (default: current directory). On OpenShift the container filesystem is not writable, so the temp file is never created.
+
+The deployment sets `workingDir: /tmp/whisper` and mounts a writable `emptyDir` there (whisper-server defaults `--tmp-dir` to the current directory).
+
+After updating the deployment:
+
+```bash
+oc rollout restart deployment/whisper -n frida-carclaims-test
+oc logs -n frida-carclaims-test deployment/whisper -f
+```
+
 ### Troubleshooting `invalid model data (bad magic)`
 
 This error means the model file is missing, empty, or not a valid whisper.cpp binary. Common causes:
