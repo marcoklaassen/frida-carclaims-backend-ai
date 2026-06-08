@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: whisper
+  namespace: frida-carclaims-test
+  labels:
+    app: whisper
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: whisper
+  template:
+    metadata:
+      labels:
+        app: whisper
+    spec:
+      containers:
+        - name: whisper
+          image: quay.io/ramalama/ramalama-whisper-server@sha256:377f9a91ba0030548bca8a3845be1c8396bd2255a0aae01e1be43845b1ee5f1e
+          ports:
+            - name: http
+              containerPort: 8000
+          env:
+            - name: MODEL_PATH
+              value: /models/ggml-small.bin
+            - name: HOST
+              value: "0.0.0.0"
+            - name: PORT
+              value: "8000"
+          volumeMounts:
+            - name: whisper-model
+              mountPath: /models/ggml-small.bin
+              subPath: ggml-small.bin
+              readOnly: true
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+      volumes:
+        - name: whisper-model
+          persistentVolumeClaim:
+            claimName: whisper-model
