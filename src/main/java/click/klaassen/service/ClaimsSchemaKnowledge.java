@@ -1,5 +1,6 @@
 package click.klaassen.service;
 
+import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.util.Set;
 import org.yaml.snakeyaml.Yaml;
 
 @ApplicationScoped
+@Startup
 public class ClaimsSchemaKnowledge {
 
     private static final String OAS_RESOURCE = "/frida/claimsOas.yaml";
