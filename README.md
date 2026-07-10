@@ -6,46 +6,33 @@ Quarkus backend for the FRIDA Car Claims voice-to-form feature. Accepts browser-
 
 - Java 21
 - Maven (wrapper included)
-- LiteLLM API key and base URL (for claims extraction)
-- Whisper API key and base URL (for speech-to-text, separate provider)
+- LiteLLM API key (for claims extraction)
+- OpenAI API key (for speech-to-text transcription)
 
 ## Configuration
 
-The backend uses **two independent OpenAI-compatible providers**:
+The backend uses **two external API services**:
 
-| Provider | Purpose | Env vars |
-|----------|---------|----------|
-| LiteLLM | Claims field extraction (Qwen3.6-35B-A3B) | `LITELLM_BASE_URL`, `LITELLM_API_KEY`, `CHAT_MODEL`, `LITELLM_TIMEOUT` (default `120s`) |
-| whisper.cpp server | Speech-to-text | `WHISPER_BASE_URL` (full `/inference` URL), `WHISPER_API_KEY` (optional) |
+| Service | Purpose | Env vars |
+|---------|---------|----------|
+| **LiteLLM** | Claims field extraction (Qwen3.6-35B-A3B) | `LITELLM_BASE_URL`, `LITELLM_API_KEY`, `CHAT_MODEL`, `LITELLM_TIMEOUT` (default `120s`) |
+| **OpenAI Whisper** | Speech-to-text transcription | `TRANSCRIPTION_BASE_URL`, `TRANSCRIPTION_API_KEY`, `TRANSCRIPTION_MODEL` (default `whisper-1`) |
 
 Example:
 
 ```shell
+# LiteLLM for claims extraction
 export LITELLM_BASE_URL=https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com/v1/
 export LITELLM_API_KEY=sk-...
 export CHAT_MODEL=Qwen3.6-35B-A3B
 
-# whisper.cpp server — must be the full /inference endpoint, not OpenAI /v1/
-export WHISPER_BASE_URL=http://localhost:51060/inference
-# export WHISPER_API_KEY=your-key   # omit when whisper.cpp has no auth
+# OpenAI Whisper for transcription
+export TRANSCRIPTION_BASE_URL=https://api.openai.com/v1/
+export TRANSCRIPTION_API_KEY=sk-proj-...
+export TRANSCRIPTION_MODEL=whisper-1
 ```
 
-`WHISPER_BASE_URL` must point at the whisper.cpp **`/inference`** endpoint. The backend uses the whisper.cpp multipart API (`file`, `response_format=json`, `language`), not OpenAI `/v1/audio/transcriptions`. Langchain4j's OpenAI transcription client is not used because it is unsupported in Quarkus and incompatible with whisper.cpp.
-
-If `WHISPER_API_KEY` is set, requests include `Authorization: Bearer <key>`. If it is unset or blank, no auth header is sent.
-
-
-### Model capabilities
-
-| Model | Audio STT | Text/JSON extraction |
-|-------|-----------|----------------------|
-| Granite-Vision-3.2 | No | Yes (text mode) |
-| Qwen2.5-VL-7B-Instruct | No | Yes (text mode) |
-| Qwen3.6-35B-A3B | No | Yes (recommended for extraction) |
-| Nomic-embed-text-v2-moe | No | No (embeddings only) |
-| Whisper | Yes | No |
-
-Vision and text models cannot replace Whisper for audio transcription. Granite-Vision and similar models handle images and text only.
+The backend uses OpenAI's `/v1/audio/transcriptions` API endpoint for audio transcription.
 
 ## Running in dev mode
 
@@ -106,7 +93,7 @@ curl -X POST http://localhost:8080/api/voice/extract \
 
 ## Architecture
 
-1. **Speech-to-text** — whisper.cpp server via `POST /inference` (multipart upload)
+1. **Speech-to-text** — OpenAI Whisper API via `POST /v1/audio/transcriptions`
 2. **Schema mapping** — Qwen3.6-35B-A3B via LiteLLM with thinking disabled (`enable_thinking: false`), temperature 0.1, and manual JSON parsing. The system prompt is built from vendored FRIDA resources under `src/main/resources/frida/` (`claimsOas.yaml`, `descriptionClaim.md`, `voice-mapping-hints.md`, `step-field-catalog.yaml`, `german-field-synonyms.md`, `voice-extraction-examples.md`). When the frontend sends `stepKey`, only fields for that form step are included in the catalog.
 3. **Merge** — Java `ClaimsDataMerger` deep-merges extracted fields into optional `currentState`
 
@@ -144,10 +131,17 @@ Native build:
 ## Tests
 
 ```shell
+# Unit tests (no API keys needed)
 ./mvnw test
+
+# Integration tests (requires TRANSCRIPTION_API_KEY)
+export TRANSCRIPTION_API_KEY=sk-proj-...
+./mvnw test -Dtest=OpenAiTranscriptionIntegrationTest
 ```
 
-Tests mock the service layer; no live LiteLLM or Whisper calls in CI.
+Unit tests mock the service layer; no live API calls in CI. Integration tests require a valid OpenAI API key and make real API calls.
+
+See [TESTING.md](TESTING.md) for detailed testing guide.
 
 ## CI: Native image on Quay.io
 
@@ -172,12 +166,18 @@ Pull the image locally:
 ```shell
 docker pull quay.io/mklaasse/frida-carclaims-backend-ai:latest
 docker run --rm -p 8080:8080 \
-  -e LITELLM_BASE_URL=... \
-  -e LITELLM_API_KEY=... \
-  -e WHISPER_BASE_URL=... \
-  -e WHISPER_API_KEY=... \
+  -e LITELLM_BASE_URL=https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com/v1/ \
+  -e LITELLM_API_KEY=sk-... \
+  -e TRANSCRIPTION_BASE_URL=https://api.openai.com/v1/ \
+  -e TRANSCRIPTION_API_KEY=sk-proj-... \
   quay.io/mklaasse/frida-carclaims-backend-ai:latest
 ```
+
+## Deployment
+
+This repository contains the application code only. Kubernetes deployment manifests (Helm charts, ArgoCD applications) are maintained in the separate [frida-carclaims-ai-gitops](https://github.com/sa-mw-dach/frida-carclaims-ai-gitops) repository.
+
+See [TRANSCRIPTION_MIGRATION.md](TRANSCRIPTION_MIGRATION.md) for migration details from self-hosted Whisper to OpenAI API.
 
 ## Security
 

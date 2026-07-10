@@ -1,12 +1,11 @@
 package click.klaassen.config;
 
-import click.klaassen.transcription.WhisperCppTranscriptionModel;
+import click.klaassen.transcription.OpenAiAudioTranscriptionModel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.model.audio.AudioTranscriptionModel;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-import java.util.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
@@ -19,13 +18,19 @@ public class AudioTranscriptionModelProducer {
     @ApplicationScoped
     public AudioTranscriptionModel audioTranscriptionModel(
             @ConfigProperty(name = "voice.transcription.base-url") String baseUrl,
-            @ConfigProperty(name = "voice.transcription.api-key", defaultValue = "") Optional<String> apiKey) {
+            @ConfigProperty(name = "voice.transcription.api-key") String apiKey,
+            @ConfigProperty(name = "voice.transcription.model", defaultValue = "whisper-1") String model) {
 
         if (baseUrl == null || baseUrl.isBlank()) {
             throw new IllegalStateException(
-                    "Whisper transcription is not configured: set WHISPER_BASE_URL (voice.transcription.base-url)");
+                    "Audio transcription is not configured: set TRANSCRIPTION_BASE_URL (voice.transcription.base-url)");
         }
 
-        return new WhisperCppTranscriptionModel(baseUrl, apiKey, objectMapper);
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalStateException(
+                    "Audio transcription API key is not configured: set TRANSCRIPTION_API_KEY (voice.transcription.api-key)");
+        }
+
+        return new OpenAiAudioTranscriptionModel(baseUrl, apiKey, model, objectMapper);
     }
 }

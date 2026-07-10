@@ -19,21 +19,34 @@ import java.util.Optional;
 import java.util.UUID;
 
 /**
- * Transcription client for whisper.cpp server ({@code POST /inference}).
- * Not compatible with OpenAI {@code /v1/audio/transcriptions}.
+ * OpenAI-compatible audio transcription client for {@code POST /v1/audio/transcriptions}.
+ * Compatible with OpenAI Whisper API and any OpenAI-compatible speech-to-text service.
  */
-public class WhisperCppTranscriptionModel implements AudioTranscriptionModel {
+public class OpenAiAudioTranscriptionModel implements AudioTranscriptionModel {
 
     private static final Duration TIMEOUT = Duration.ofMinutes(5);
+    private static final String DEFAULT_MODEL = "whisper-1";
 
-    private final String inferenceUrl;
-    private final Optional<String> apiKey;
+    private final String baseUrl;
+    private final String apiKey;
+    private final String model;
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
-    public WhisperCppTranscriptionModel(String inferenceUrl, Optional<String> apiKey, ObjectMapper objectMapper) {
-        this.inferenceUrl = inferenceUrl;
+    public OpenAiAudioTranscriptionModel(
+            String baseUrl,
+            String apiKey,
+            String model,
+            ObjectMapper objectMapper) {
+        if (baseUrl == null || baseUrl.isBlank()) {
+            throw new IllegalArgumentException("baseUrl is required");
+        }
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new IllegalArgumentException("apiKey is required");
+        }
+        this.baseUrl = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
         this.apiKey = apiKey;
+        this.model = model != null && !model.isBlank() ? model : DEFAULT_MODEL;
         this.objectMapper = objectMapper;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(TIMEOUT)
@@ -47,29 +60,30 @@ public class WhisperCppTranscriptionModel implements AudioTranscriptionModel {
             String filename = filenameForMimeType(request.audio().mimeType());
             byte[] body = buildMultipartBody(audioBytes, filename, request.language());
 
-            HttpRequest.Builder httpRequestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create(inferenceUrl))
+            String url = baseUrl + "audio/transcriptions";
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
                     .timeout(TIMEOUT)
                     .header("Content-Type", "multipart/form-data; boundary=" + BOUNDARY)
-                    .POST(HttpRequest.BodyPublishers.ofByteArray(body));
-
-            apiKey.filter(key -> !key.isBlank())
-                    .ifPresent(key -> httpRequestBuilder.header("Authorization", "Bearer " + key));
+                    .header("Authorization", "Bearer " + apiKey)
+                    .POST(HttpRequest.BodyPublishers.ofByteArray(body))
+                    .build();
 
             HttpResponse<String> response = httpClient.send(
-                    httpRequestBuilder.build(),
+                    httpRequest,
                     HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
-                throw new IOException("Whisper.cpp returned HTTP " + response.statusCode() + ": " + response.body());
+                throw new IOException("OpenAI transcription API returned HTTP "
+                        + response.statusCode() + ": " + response.body());
             }
 
             return new AudioTranscriptionResponse(parseTranscript(response.body()));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Whisper.cpp transcription interrupted", e);
+            throw new RuntimeException("Audio transcription interrupted", e);
         } catch (IOException e) {
-            throw new RuntimeException("Whisper.cpp transcription failed", e);
+            throw new RuntimeException("Audio transcription failed", e);
         }
     }
 
@@ -109,17 +123,28 @@ public class WhisperCppTranscriptionModel implements AudioTranscriptionModel {
         throw new IOException("Audio has no binaryData, base64Data, or url");
     }
 
-    private static final String BOUNDARY = "----WhisperCpp" + UUID.randomUUID();
+    private static final String BOUNDARY = "----OpenAiAudioBoundary" + UUID.randomUUID();
 
     private byte[] buildMultipartBody(byte[] audioBytes, String filename, String language) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+        // file field (required)
         writeField(out, "file", audioBytes, filename, "application/octet-stream");
+
+        // model field (required)
+        writeField(out, "model", model);
+
+        // response_format (optional, default is json)
         writeField(out, "response_format", "json");
-        writeField(out, "temperature", "0.0");
-        writeField(out, "translate", "false");
+
+        // language (optional)
         if (language != null && !language.isBlank()) {
             writeField(out, "language", language);
         }
+
+        // temperature (optional, 0-1, default 0)
+        writeField(out, "temperature", "0.0");
+
         out.write(("--" + BOUNDARY + "--\r\n").getBytes(StandardCharsets.UTF_8));
         return out.toByteArray();
     }
@@ -150,6 +175,7 @@ public class WhisperCppTranscriptionModel implements AudioTranscriptionModel {
             case "audio/mpeg", "audio/mp3" -> "audio.mp3";
             case "audio/ogg" -> "audio.ogg";
             case "audio/mp4", "audio/m4a", "audio/x-m4a" -> "audio.m4a";
+            case "audio/flac" -> "audio.flac";
             default -> "audio.webm";
         };
     }
