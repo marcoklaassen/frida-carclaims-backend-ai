@@ -85,11 +85,12 @@ paths:
 components:
   schemas:
     Claimsdata:
-      description: Holds all information required for submitting a `Comprehensive Claim` to the insurance company.
+      description: Holds all information required for submitting a `Comprehensive Claim` to the insurance company. All fields are flat (no nested objects).
       type: object
       properties:
         language:
           type: string
+          description: Sprache
           example: DE
           enum:
             - DE
@@ -111,242 +112,278 @@ components:
           example: '08:30:00'
         accidentPostalCode:
           type: string
-          description: PLZ
+          description: PLZ des Unfallorts
           example: '50181'
         accidentCity:
           type: string
-          description: Ort
+          description: Ort des Unfalls
           example: Bedburg
         accidentStreetName:
           type: string
-          description: Straße
+          description: Straße des Unfallorts
           example: Germaniastraße
-        accidentStreetNumber:
+        accidentHouseNumber:
           type: string
-          description: Hausnummer
+          description: Hausnummer des Unfallorts
           example: 1b
-        accidentDescription:
+        accidentDetails:
           type: string
           description: Unfallbeschreibung
-        accidentPoliceNumber:
+        accidentReportNumber:
           type: string
           description: Unfallnummer der Polizei
           example: 2024-ABC123
-        hasVehicleDamage:
+        miscellaneousDamages:
           type: string
           description: weitere Sachschäden ja/nein
           enum:
             - not_specified
             - 'false'
             - 'true'
-        vehicleDamageDescription:
+        miscellaneousDamageDescription:
           type: string
           description: Beschreibung der Sachschäden
           example: Frontstoßstangenschaden
-        injuredPerson:
+        hasInjured:
           type: string
           description: Verletzte Person ja/nein
           enum:
             - not_specified
             - 'false'
             - 'true'
-        injuredPersonNumber:
+        injuredCount:
           type: string
           description: Anzahl verletzte Personen
-        witnessExists:
+        hasWitnesses:
           type: string
           description: Zeuge ja/nein
           enum:
             - not_specified
             - 'false'
             - 'true'
-        witnessCount:
+        witnessesCount:
           type: string
           description: Anzahl Zeugen
-        witness:
+        witnesses:
           type: array
+          description: Liste der Zeugen
           items:
-            $ref: '#/components/schemas/Witness'
-        vehicleDriver:
-          description: Fahrer A
-          $ref: '#/components/schemas/VehicleDriver'
-        otherVehicleDriver:
-          description: Fahrer B
-          $ref: '#/components/schemas/VehicleDriver'
-        policyholder:
-          description: Policyholder A
-          $ref: '#/components/schemas/Policyholder'
-        otherPolicyholder:
-          description: Policyholder B
-          $ref: '#/components/schemas/Policyholder'
-      required:
-        - policyholder
-        - otherPolicyholder
-        - hasVehicleDamage
-        - injuredPerson
-        - witnessExists
-      additionalProperties: false
-    Person:
-      description: 'Holds all information of a Person who could either be a `Witness`, or a part of a `Policyholder` or `Vehicle Driver`.'
-      type: object
-      properties:
-        formOfAddress:
+            $ref: '#/components/schemas/WitnessDetails'
+        insuranceHolderSalutation:
           type: string
-          description: Anrede
+          description: Anrede Versicherungsnehmer A
           enum:
-            - not_specified
             - Herr
             - Frau
-        title:
+        insuranceHolderTitle:
           type: string
-          description: Titel
+          description: Titel Versicherungsnehmer A
           enum:
             - Dr.
             - Dr. Dr.
             - Prof.
-        lastName:
+        insuranceHolderName:
           type: string
-          description: Nachname
-          example: Johnson
-        firstName:
-          type: string
-          description: Vorname
+          description: Vorname Versicherungsnehmer A
           example: Alice
-        postalCode:
+        insuranceHolderSurName:
           type: string
-          description: PLZ
-          example: '50181'
-        city:
+          description: Nachname Versicherungsnehmer A
+          example: Johnson
+        insuranceHolderStreetName:
           type: string
-          description: Ort
-          example: Bedburg
-        streetName:
-          type: string
-          description: Straße
+          description: Straße Versicherungsnehmer A
           example: Germaniastraße
-        streetNumber:
+        insuranceHolderHouseNumber:
           type: string
-          description: Hausnummer
+          description: Hausnummer Versicherungsnehmer A
           example: 1b
-        phoneNumber:
+        insuranceHolderPostalCode:
           type: string
-          description: Telefonnummer
-          example: +49(40)321070
-        emailAddress:
+          description: PLZ Versicherungsnehmer A
+          example: '50181'
+        insuranceHolderCity:
           type: string
-          format: email
-          description: E-Mail Adresse
+          description: Ort Versicherungsnehmer A
+          example: Bedburg
+        insuranceHolderTelephone:
+          type: string
+          description: Telefonnummer Versicherungsnehmer A
+          example: '+49(40)321070'
+        insuranceHolderEmail:
+          type: string
+          description: E-Mail Versicherungsnehmer A
           example: example@gmail.com
-      additionalProperties: false
-    Policyholder:
-      description: Holds all information of a `Policyholder`.
-      type: object
-      properties:
-        personalInformation:
-          $ref: '#/components/schemas/Person'
-        inputTaxDeduction:
+        vatDeduction:
           type: string
-          description: Vorsteuerabzug ja/nein
+          description: Vorsteuerabzug ja/nein (A)
           enum:
             - not_specified
             - 'false'
             - 'true'
-        vehicleMake:
+        carBrand:
           type: string
-          description: Fahrzeugmarke || will be extracted from <Policy Pass>
+          description: Fahrzeugmarke A
           example: BMW
-        vehicleType:
+        carModel:
           type: string
-          description: Fahrzeugmodell || will be extracted from <Policy Pass>
+          description: Fahrzeugmodell A
           example: M5
-        vehicleReg:
+        licensePlate:
           type: string
-          description: Kennzeichen ||will be extracted from <Policy Pass>
+          description: Kennzeichen A
           example: BM LD1234
         insuranceCompany:
           type: string
-          description: Versicherungsanbieter || will be extracted from <Companion Pass>
+          description: Versicherungsanbieter A
           example: HDI
-        policyNumber:
+        insuranceNumber:
           type: string
-          description: Policennummer || will be extracted from <Policy Pass>
+          description: Policennummer A
           example: V-123-345-678-5
-        vin:
+        chassisNumber:
           type: string
-          description: Fahrzeug-Identifizierungsnummer || will be extracted from <Policy Pass>
+          description: Fahrzeug-Identifizierungsnummer A
           example: W0L000051T2123456
-        currentMileage:
-          type: integer
-          description: aktueller Kilometerstand
-          example: 1200
-        greencardNumber:
+        odometerReading:
           type: string
-          description: Grüne-Karte Nummer
-        greencardExpirydate:
+          description: aktueller Kilometerstand A
+          example: '1200'
+        greenCardNumber:
           type: string
-          description: Ablaufdatum der Grünen Karte
+          description: Grüne-Karte Nummer A
+        validDateGreenCard:
+          type: string
+          description: Ablaufdatum der Grünen Karte A
           format: date
-        comprehensiveInsurance:
+        allRiskInsurance:
           type: string
-          description: Vollkaskoversichert ja/nein
+          description: Vollkaskoversichert ja/nein (A)
           enum:
             - not_specified
             - 'false'
             - 'true'
-      additionalProperties: false
-    Witness:
-      description: Holds all information of a `Witness`.
-      properties:
-        personalInformation:
-          $ref: '#/components/schemas/Person'
-    VehicleDriver:
-      description: Holds all information of a `Vehicle Driver`.
-      type: object
-      properties:
-        personalInformation:
-          $ref: '#/components/schemas/Person'
-        driverLicensenumber:
+        otherInsuranceHolderSalutation:
           type: string
-          description: Führerscheinnummer
+          description: Anrede Versicherungsnehmer B
+          enum:
+            - Herr
+            - Frau
+        otherInsuranceHolderTitle:
+          type: string
+          description: Titel Versicherungsnehmer B
+          enum:
+            - Dr.
+            - Dr. Dr.
+            - Prof.
+        otherInsuranceHolderName:
+          type: string
+          description: Vorname Versicherungsnehmer B
+          example: Bob
+        otherInsuranceHolderSurName:
+          type: string
+          description: Nachname Versicherungsnehmer B
+          example: Smith
+        otherInsuranceHolderStreetName:
+          type: string
+          description: Straße Versicherungsnehmer B
+        otherInsuranceHolderHouseNumber:
+          type: string
+          description: Hausnummer Versicherungsnehmer B
+        otherInsuranceHolderPostalCode:
+          type: string
+          description: PLZ Versicherungsnehmer B
+        otherInsuranceHolderCity:
+          type: string
+          description: Ort Versicherungsnehmer B
+        otherInsuranceHolderTelephone:
+          type: string
+          description: Telefonnummer Versicherungsnehmer B
+        otherInsuranceHolderEmail:
+          type: string
+          description: E-Mail Versicherungsnehmer B
+        otherVatDeduction:
+          type: string
+          description: Vorsteuerabzug ja/nein (B)
+          enum:
+            - not_specified
+            - 'false'
+            - 'true'
+        otherCarBrand:
+          type: string
+          description: Fahrzeugmarke B
+        otherCarModel:
+          type: string
+          description: Fahrzeugmodell B
+        otherLicensePlate:
+          type: string
+          description: Kennzeichen B
+        otherInsuranceCompany:
+          type: string
+          description: Versicherungsanbieter B
+        otherInsuranceNumber:
+          type: string
+          description: Policennummer B
+        otherChassisNumber:
+          type: string
+          description: Fahrzeug-Identifizierungsnummer B
+        otherOdometerReading:
+          type: string
+          description: aktueller Kilometerstand B
+        otherGreenCardNumber:
+          type: string
+          description: Grüne-Karte Nummer B
+        otherValidDateGreenCard:
+          type: string
+          description: Ablaufdatum der Grünen Karte B
+          format: date
+        otherAllRiskInsurance:
+          type: string
+          description: Vollkaskoversichert ja/nein (B)
+          enum:
+            - not_specified
+            - 'false'
+            - 'true'
+        driverSalutation:
+          type: string
+          description: Anrede Fahrer A
+          enum:
+            - Herr
+            - Frau
+        driverName:
+          type: string
+          description: Vorname Fahrer A
+        driverSurName:
+          type: string
+          description: Nachname Fahrer A
+        driverStreetName:
+          type: string
+          description: Straße Fahrer A
+        driverHouseNumber:
+          type: string
+          description: Hausnummer Fahrer A
+        driverPostalCode:
+          type: string
+          description: PLZ Fahrer A
+        driverCity:
+          type: string
+          description: Ort Fahrer A
+        driverTelephone:
+          type: string
+          description: Telefonnummer Fahrer A
+        driverEmail:
+          type: string
+          description: E-Mail Fahrer A
+        driverDriverLicense:
+          type: string
+          description: Führerscheinnummer Fahrer A
           example: DR123456
-        licenseIssuedBy:
+        driverLicenseIssuingAuthority:
           type: string
-          description: Führerschein ausgestellt von
-        damagedCarImages:
-          maxItems: 8
+          description: Führerschein ausgestellt von (A)
+        driverDamagedParts:
           type: array
-          description: Bilder vom Schaden
-          items:
-            type: object
-            properties:
-              file:
-                type: string
-                format: byte
-                description: Bild vom Schaden || native FileAPI des Clients (Dunkelverarbeitung)
-                example: iVBORw0KGgoAAAANSUhEUgAAAAUA
-              path:
-                type: string
-                description: Pfad zum Bild
-            additionalProperties: false
-        damagedWindowImages:
-          maxItems: 8
-          type: array
-          description: Bilder vom Glasschaden
-          items:
-            type: object
-            properties:
-              file:
-                type: string
-                format: byte
-                description: Bild vom Glasschaden || native FileAPI des Clients (Dunkelverarbeitung)
-                example: iVBORw0KGgoAAAANSUhEUgAAAAUA
-              path:
-                type: string
-                description: Pfad zum Bild
-            additionalProperties: false
-        driverDamagedpartsGraphic:
-          type: array
-          description: Auswahl der beschädigten Stellen
+          description: Auswahl der beschädigten Stellen (A)
           items:
             type: string
             enum:
@@ -368,22 +405,22 @@ components:
               - Heckscheibe
               - Kofferraum
             example: hinten links
-        driverVisibleDamage:
+        damageDescription:
           type: string
-          description: Beschreibung sichtbare Schäden
-        driverComments:
+          description: Beschreibung sichtbare Schäden (A)
+        additionalComments:
           type: string
-          description: Bemerkungen des Fahrers
-        vehicleDrivingAbility:
+          description: Bemerkungen des Fahrers (A)
+        vehicleOperational:
           type: string
-          description: Fahrbereitschaft des Fahrzeugs ja/nein
+          description: Fahrbereitschaft des Fahrzeugs ja/nein (A)
           enum:
             - not_specified
             - 'true'
             - 'false'
-        damageCausedBy:
-          description: Auswahl der Schadenursache
+        damageType:
           type: string
+          description: Auswahl der Schadenursache (A)
           enum:
             - Auffahren
             - Rangieren/Parken
@@ -394,17 +431,127 @@ components:
             - Spurwechsel
             - Sonstiges
           example: Auffahren
-        typeOfWildlife:
+        otherDriverSalutation:
           type: string
-          description: Tierart
-          example: Rehwild
-        certificateForWildlife:
+          description: Anrede Fahrer B
+          enum:
+            - Herr
+            - Frau
+        otherDriverName:
           type: string
-          description: Bestätigung durch Förster || native FileAPI des Clients (Dunkelverarbeitung)
-        garageLocation:
+          description: Vorname Fahrer B
+        otherDriverSurName:
           type: string
-          description: Werkstatt Standort
-          example: 50°56’28.8″N 6°57’30.0
+          description: Nachname Fahrer B
+        otherDriverStreetName:
+          type: string
+          description: Straße Fahrer B
+        otherDriverHouseNumber:
+          type: string
+          description: Hausnummer Fahrer B
+        otherDriverPostalCode:
+          type: string
+          description: PLZ Fahrer B
+        otherDriverCity:
+          type: string
+          description: Ort Fahrer B
+        otherDriverTelephone:
+          type: string
+          description: Telefonnummer Fahrer B
+        otherDriverEmail:
+          type: string
+          description: E-Mail Fahrer B
+        otherDriverDriverLicense:
+          type: string
+          description: Führerscheinnummer Fahrer B
+        otherDriverLicenseIssuingAuthority:
+          type: string
+          description: Führerschein ausgestellt von (B)
+        otherDriverDamagedParts:
+          type: array
+          description: Auswahl der beschädigten Stellen (B)
+          items:
+            type: string
+            enum:
+              - vorne links
+              - vorne rechts
+              - Seite vorne links
+              - Seite vorne rechts
+              - Fahrertür links
+              - Beifahrertür rechts
+              - hintere Tür links
+              - hintere Tür rechts
+              - Seite hinten links
+              - Seite hinten rechts
+              - hinten links
+              - hinten rechts
+              - Motorhaube
+              - Frontscheibe
+              - Dach
+              - Heckscheibe
+              - Kofferraum
+            example: hinten links
+        otherDamageDescription:
+          type: string
+          description: Beschreibung sichtbare Schäden (B)
+        otherAdditionalComments:
+          type: string
+          description: Bemerkungen des Fahrers (B)
+        otherVehicleOperational:
+          type: string
+          description: Fahrbereitschaft des Fahrzeugs ja/nein (B)
+          enum:
+            - not_specified
+            - 'true'
+            - 'false'
+        otherDamageType:
+          type: string
+          description: Auswahl der Schadenursache (B)
+          enum:
+            - Auffahren
+            - Rangieren/Parken
+            - Missachtung der Vorfahrt
+            - Abbiegen
+            - Abkommen von der Fahrbahn
+            - Überholvorgang
+            - Spurwechsel
+            - Sonstiges
+          example: Auffahren
+      additionalProperties: false
+    WitnessDetails:
+      description: Holds all information of a single witness.
+      type: object
+      properties:
+        salutation:
+          type: string
+          description: Anrede Zeuge
+          enum:
+            - Herr
+            - Frau
+        name:
+          type: string
+          description: Vorname Zeuge
+        surName:
+          type: string
+          description: Nachname Zeuge
+        streetName:
+          type: string
+          description: Straße Zeuge
+        houseNumber:
+          type: string
+          description: Hausnummer Zeuge
+        postalCode:
+          type: string
+          description: PLZ Zeuge
+        city:
+          type: string
+          description: Ort Zeuge
+        telephone:
+          type: string
+          description: Telefonnummer Zeuge
+        email:
+          type: string
+          description: E-Mail Zeuge
       additionalProperties: false
     ErrorList:
       description: Error object

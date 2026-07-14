@@ -1,6 +1,7 @@
 package click.klaassen.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import click.klaassen.claims.model.Claimsdata;
@@ -43,34 +44,29 @@ class ClaimsJsonParserTest {
     }
 
     @Test
-    void parseRemovesInvalidNotSpecifiedFromDamageCause() throws Exception {
+    void parseRemovesInvalidNotSpecifiedFromDamageType() throws Exception {
         String json = """
                 {
-                  "policyholder": {
-                    "personalInformation": { "firstName": "Marco", "lastName": "Klasen" }
-                  },
-                  "otherVehicleDriver": {
-                    "damageCausedBy": "not_specified"
-                  }
+                  "insuranceHolderSurName": "Marco",
+                  "insuranceHolderName": "Klasen",
+                  "otherDamageType": "not_specified"
                 }
                 """;
         Claimsdata claims = ClaimsJsonParser.parse(objectMapper, json);
-        assertEquals("Marco", claims.getPolicyholder().getPersonalInformation().getFirstName());
-        assertEquals(null, claims.getOtherVehicleDriver());
+        assertEquals("Marco", claims.getInsuranceHolderSurName());
+        assertNull(claims.getOtherDamageType());
     }
 
     @Test
     void parseKeepsNotSpecifiedForTriStateFields() throws Exception {
         String json = """
                 {
-                  "hasVehicleDamage": "not_specified",
-                  "policyholder": {
-                    "personalInformation": { "formOfAddress": "not_specified" }
-                  }
+                  "miscellaneousDamages": "not_specified",
+                  "insuranceHolderSalutation": "not_specified"
                 }
                 """;
         Claimsdata claims = ClaimsJsonParser.parse(objectMapper, json);
-        assertEquals("not_specified", claims.getHasVehicleDamage().getValue());
-        assertEquals("not_specified", claims.getPolicyholder().getPersonalInformation().getFormOfAddress().getValue());
+        assertEquals("not_specified", claims.getMiscellaneousDamages().getValue());
+        assertEquals("not_specified", claims.getInsuranceHolderSalutation());
     }
 }

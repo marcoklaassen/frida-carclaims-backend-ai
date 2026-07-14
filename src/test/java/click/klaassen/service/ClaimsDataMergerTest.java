@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import click.klaassen.claims.model.Claimsdata;
-import click.klaassen.claims.model.Person;
-import click.klaassen.claims.model.Policyholder;
-import click.klaassen.claims.model.Witness;
+import click.klaassen.claims.model.WitnessDetails;
 import click.klaassen.claims.model.enums.TriState;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,68 +36,51 @@ class ClaimsDataMergerTest {
     }
 
     @Test
-    void mergeNestedPersonFields() {
-        Person currentPerson = new Person();
-        currentPerson.setFirstName("Alice");
+    void mergeFlatInsuranceHolderFields() {
+        Claimsdata current = new Claimsdata();
+        current.setInsuranceHolderSurName("Alice");
 
-        Policyholder current = new Policyholder();
-        current.setPersonalInformation(currentPerson);
+        Claimsdata extracted = new Claimsdata();
+        extracted.setInsuranceHolderName("Johnson");
 
-        Person extractedPerson = new Person();
-        extractedPerson.setLastName("Johnson");
+        Claimsdata merged = merger.merge(current, extracted);
 
-        Policyholder extracted = new Policyholder();
-        extracted.setPersonalInformation(extractedPerson);
-
-        Claimsdata currentClaims = new Claimsdata();
-        currentClaims.setPolicyholder(current);
-
-        Claimsdata extractedClaims = new Claimsdata();
-        extractedClaims.setPolicyholder(extracted);
-
-        Claimsdata merged = merger.merge(currentClaims, extractedClaims);
-
-        assertNotNull(merged.getPolicyholder());
-        assertEquals("Alice", merged.getPolicyholder().getPersonalInformation().getFirstName());
-        assertEquals("Johnson", merged.getPolicyholder().getPersonalInformation().getLastName());
+        assertEquals("Alice", merged.getInsuranceHolderSurName());
+        assertEquals("Johnson", merged.getInsuranceHolderName());
     }
 
     @Test
     void mergeAppendsWitnesses() {
-        Witness existing = new Witness();
-        Person existingPerson = new Person();
-        existingPerson.setFirstName("Max");
-        existing.setPersonalInformation(existingPerson);
+        WitnessDetails existing = new WitnessDetails();
+        existing.setSurName("Max");
 
-        Witness added = new Witness();
-        Person addedPerson = new Person();
-        addedPerson.setFirstName("Anna");
-        added.setPersonalInformation(addedPerson);
+        WitnessDetails added = new WitnessDetails();
+        added.setSurName("Anna");
 
         Claimsdata current = new Claimsdata();
-        current.setWitness(new ArrayList<>(List.of(existing)));
+        current.setWitnesses(new ArrayList<>(List.of(existing)));
 
         Claimsdata extracted = new Claimsdata();
-        extracted.setWitness(List.of(added));
+        extracted.setWitnesses(List.of(added));
 
         Claimsdata merged = merger.merge(current, extracted);
 
-        assertEquals(2, merged.getWitness().size());
-        assertEquals("Max", merged.getWitness().get(0).getPersonalInformation().getFirstName());
-        assertEquals("Anna", merged.getWitness().get(1).getPersonalInformation().getFirstName());
+        assertEquals(2, merged.getWitnesses().size());
+        assertEquals("Max", merged.getWitnesses().get(0).getSurName());
+        assertEquals("Anna", merged.getWitnesses().get(1).getSurName());
     }
 
     @Test
     void mergeTriStatePrefersExtracted() {
         Claimsdata current = new Claimsdata();
-        current.setInjuredPerson(TriState.FALSE);
+        current.setHasInjured(TriState.FALSE);
 
         Claimsdata extracted = new Claimsdata();
-        extracted.setInjuredPerson(TriState.TRUE);
+        extracted.setHasInjured(TriState.TRUE);
 
         Claimsdata merged = merger.merge(current, extracted);
 
-        assertEquals(TriState.TRUE, merged.getInjuredPerson());
+        assertEquals(TriState.TRUE, merged.getHasInjured());
     }
 
     @Test

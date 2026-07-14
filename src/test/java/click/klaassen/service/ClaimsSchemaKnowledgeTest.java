@@ -21,27 +21,18 @@ class ClaimsSchemaKnowledgeTest {
         String section = schemaKnowledge.getSchemaPromptSection();
 
         assertTrue(section.contains("accidentCity | Ort"));
-        assertTrue(section.contains("policyholder.vehicleReg | Kennzeichen"));
-        assertTrue(section.contains("vehicleDriver.damageCausedBy | Auswahl der Schadenursache"));
-        assertTrue(section.contains("policyholder.personalInformation.firstName | Vorname"));
+        assertTrue(section.contains("licensePlate |"));
+        assertTrue(section.contains("damageType |"));
+        assertTrue(section.contains("insuranceHolderSurName |"));
     }
 
     @Test
     void catalogIncludesEnumValues() {
         String section = schemaKnowledge.getSchemaPromptSection();
 
-        assertTrue(section.contains("hasVehicleDamage"));
+        assertTrue(section.contains("miscellaneousDamages"));
         assertTrue(section.contains("enum: not_specified, false, true"));
         assertTrue(section.contains("enum: Auffahren, Rangieren/Parken"));
-    }
-
-    @Test
-    void binaryAndImageFieldsAreExcluded() {
-        String section = schemaKnowledge.getSchemaPromptSection();
-
-        assertFalse(section.contains("damagedCarImages"));
-        assertFalse(section.contains("damagedWindowImages"));
-        assertFalse(section.contains("certificateForWildlife"));
     }
 
     @Test
@@ -51,7 +42,6 @@ class ClaimsSchemaKnowledgeTest {
         assertTrue(section.contains("Domain context:"));
         assertTrue(section.contains("FRIDA Schaden API"));
         assertTrue(section.contains("Voice mapping hints:"));
-        assertTrue(section.contains("licensePlateNumber"));
     }
 
     @Test
@@ -59,9 +49,7 @@ class ClaimsSchemaKnowledgeTest {
         String section = schemaKnowledge.getSchemaPromptSection("carclaimsDetails");
 
         assertTrue(section.contains("German field synonyms"));
-        assertTrue(section.contains("Kennzeichen, Nummernschild"));
         assertTrue(section.contains("Few-shot extraction examples"));
-        assertTrue(section.contains("[Music]"));
     }
 
     @Test
@@ -71,12 +59,13 @@ class ClaimsSchemaKnowledgeTest {
 
     @Test
     void stepScopedCatalogFiltersToAccidentFieldsOnly() {
+        List<String> catalogLines = schemaKnowledge.filteredCatalogLinesForStep("carclaimsDetails");
+        String catalog = String.join("\n", catalogLines);
         String section = schemaKnowledge.getSchemaPromptSection("carclaimsDetails");
 
-        assertTrue(section.contains("accidentCity | Ort"));
+        assertTrue(catalog.contains("accidentCity | Ort"));
         assertTrue(section.contains("Step-specific hints (carclaimsDetails)"));
-        assertFalse(section.contains("policyholder.vehicleReg | Kennzeichen"));
-        assertFalse(section.contains("otherPolicyholder.vehicleReg | Kennzeichen"));
+        assertFalse(catalog.contains("licensePlate |"));
     }
 
     @Test
@@ -85,10 +74,10 @@ class ClaimsSchemaKnowledgeTest {
         String catalog = String.join("\n", catalogLines);
         String section = schemaKnowledge.getSchemaPromptSection("insurance-holder-a");
 
-        assertTrue(catalog.contains("policyholder.vehicleReg | Kennzeichen"));
+        assertTrue(catalog.contains("licensePlate |"));
         assertFalse(catalog.contains("accidentCity | Ort"));
-        assertFalse(catalog.contains("vehicleDriver.damageCausedBy"));
-        assertTrue(section.contains("policyholder.vehicleReg | Kennzeichen"));
+        assertFalse(catalog.contains("damageType |"));
+        assertTrue(section.contains("licensePlate |"));
     }
 
     @Test
@@ -102,8 +91,8 @@ class ClaimsSchemaKnowledgeTest {
         String full = schemaKnowledge.getSchemaPromptSection(null);
         String unknown = schemaKnowledge.getSchemaPromptSection("nonexistent-step");
 
-        assertTrue(full.contains("policyholder.vehicleReg | Kennzeichen"));
-        assertTrue(unknown.contains("policyholder.vehicleReg | Kennzeichen"));
+        assertTrue(full.contains("licensePlate |"));
+        assertTrue(unknown.contains("licensePlate |"));
         assertFalse(full.contains("German field synonyms"));
         assertFalse(unknown.contains("German field synonyms"));
     }

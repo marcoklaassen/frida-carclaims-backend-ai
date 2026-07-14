@@ -19,11 +19,11 @@ final class ClaimsSchemaPrompt {
             return {}.
             - Map spoken German dates to YYYY-MM-DD and times to HH:mm:ss.
             - Omit image/binary fields unless explicitly described.
-            - Use nested objects exactly as shown in the field catalog. Omit unmentioned fields.
-            - Do NOT populate otherVehicleDriver or otherPolicyholder unless the transcript explicitly mentions \
+            - Use exact flat field names from the catalog. Omit unmentioned fields.
+            - Do NOT populate otherDriver*/otherInsuranceHolder* fields unless the transcript explicitly mentions \
             the other party.
-            - The value not_specified is ONLY valid for tri-state yes/no fields and formOfAddress. Never use it for \
-            damageCausedBy, language, title, or driverDamagedpartsGraphic — omit those fields instead.
+            - The value not_specified is ONLY valid for tri-state yes/no fields and salutation fields. Never use it for \
+            damageType, language, title, or driverDamagedParts — omit those fields instead.
             - When a step-specific field catalog is provided, extract ONLY fields from that catalog.
 
             """;

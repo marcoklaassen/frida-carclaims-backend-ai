@@ -42,14 +42,14 @@ class VoiceExtractionPromptTest {
         assertTrue(accident.contains("German field synonyms"));
         assertFalse(full.contains("German field synonyms"));
         assertTrue(accident.contains("accidentCity | Ort"));
-        assertFalse(accident.contains("policyholder.vehicleReg | Kennzeichen"));
+        assertFalse(accident.contains("licensePlate | Kennzeichen"));
     }
 
     @Test
     void driverStepIncludesDamageCauseEnum() {
         String section = schemaKnowledge.getSchemaPromptSection("driver-a");
 
-        assertTrue(section.contains("vehicleDriver.damageCausedBy"));
+        assertTrue(section.contains("damageType |"));
         assertTrue(section.contains("enum: Auffahren, Rangieren/Parken"));
     }
 
@@ -57,8 +57,8 @@ class VoiceExtractionPromptTest {
     void witnessStepIncludesWitnessArrayPaths() {
         String section = schemaKnowledge.getSchemaPromptSection("witness");
 
-        assertTrue(section.contains("witnessExists"));
-        assertTrue(section.contains("witnessCount"));
-        assertTrue(section.contains("witness[].personalInformation"));
+        assertTrue(section.contains("hasWitnesses"));
+        assertTrue(section.contains("witnessesCount"));
+        assertTrue(section.contains("witnesses[]."));
     }
 }

@@ -19,13 +19,19 @@ public final class ClaimsJsonParser {
     private static final String PLACEHOLDER = "not_specified";
 
     private static final Set<String> NOT_SPECIFIED_ALLOWED = Set.of(
-            "hasVehicleDamage",
-            "injuredPerson",
-            "witnessExists",
-            "comprehensiveInsurance",
-            "inputTaxDeduction",
-            "vehicleDrivingAbility",
-            "formOfAddress");
+            "miscellaneousDamages",
+            "hasInjured",
+            "hasWitnesses",
+            "allRiskInsurance",
+            "otherAllRiskInsurance",
+            "vatDeduction",
+            "otherVatDeduction",
+            "vehicleOperational",
+            "otherVehicleOperational",
+            "insuranceHolderSalutation",
+            "otherInsuranceHolderSalutation",
+            "driverSalutation",
+            "otherDriverSalutation");
 
     private ClaimsJsonParser() {
     }

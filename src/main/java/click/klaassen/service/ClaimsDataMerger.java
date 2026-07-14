@@ -1,12 +1,9 @@
 package click.klaassen.service;
 
 import click.klaassen.claims.model.Claimsdata;
-import click.klaassen.claims.model.DamagedImage;
-import click.klaassen.claims.model.Person;
-import click.klaassen.claims.model.Policyholder;
-import click.klaassen.claims.model.VehicleDriver;
-import click.klaassen.claims.model.Witness;
-import click.klaassen.claims.model.enums.DamagedPart;
+import click.klaassen.claims.model.WitnessDetails;
+import click.klaassen.claims.model.enums.Language;
+import click.klaassen.claims.model.enums.TriState;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -25,26 +22,114 @@ public class ClaimsDataMerger {
         }
 
         Claimsdata merged = new Claimsdata();
-        merged.setLanguage(extracted.getLanguage() != null ? extracted.getLanguage() : current.getLanguage());
+
+        // --- General ---
+        merged.setLanguage(mergeEnum(current.getLanguage(), extracted.getLanguage()));
+
+        // --- Accident ---
         merged.setAccidentDate(mergeScalar(current.getAccidentDate(), extracted.getAccidentDate()));
         merged.setAccidentTime(mergeScalar(current.getAccidentTime(), extracted.getAccidentTime()));
         merged.setAccidentPostalCode(mergeScalar(current.getAccidentPostalCode(), extracted.getAccidentPostalCode()));
         merged.setAccidentCity(mergeScalar(current.getAccidentCity(), extracted.getAccidentCity()));
         merged.setAccidentStreetName(mergeScalar(current.getAccidentStreetName(), extracted.getAccidentStreetName()));
-        merged.setAccidentStreetNumber(mergeScalar(current.getAccidentStreetNumber(), extracted.getAccidentStreetNumber()));
-        merged.setAccidentDescription(mergeScalar(current.getAccidentDescription(), extracted.getAccidentDescription()));
-        merged.setAccidentPoliceNumber(mergeScalar(current.getAccidentPoliceNumber(), extracted.getAccidentPoliceNumber()));
-        merged.setHasVehicleDamage(extracted.getHasVehicleDamage() != null ? extracted.getHasVehicleDamage() : current.getHasVehicleDamage());
-        merged.setVehicleDamageDescription(mergeScalar(current.getVehicleDamageDescription(), extracted.getVehicleDamageDescription()));
-        merged.setInjuredPerson(extracted.getInjuredPerson() != null ? extracted.getInjuredPerson() : current.getInjuredPerson());
-        merged.setInjuredPersonNumber(mergeScalar(current.getInjuredPersonNumber(), extracted.getInjuredPersonNumber()));
-        merged.setWitnessExists(extracted.getWitnessExists() != null ? extracted.getWitnessExists() : current.getWitnessExists());
-        merged.setWitnessCount(mergeScalar(current.getWitnessCount(), extracted.getWitnessCount()));
-        merged.setWitness(mergeWitnesses(current.getWitness(), extracted.getWitness()));
-        merged.setVehicleDriver(mergeVehicleDriver(current.getVehicleDriver(), extracted.getVehicleDriver()));
-        merged.setOtherVehicleDriver(mergeVehicleDriver(current.getOtherVehicleDriver(), extracted.getOtherVehicleDriver()));
-        merged.setPolicyholder(mergePolicyholder(current.getPolicyholder(), extracted.getPolicyholder()));
-        merged.setOtherPolicyholder(mergePolicyholder(current.getOtherPolicyholder(), extracted.getOtherPolicyholder()));
+        merged.setAccidentHouseNumber(mergeScalar(current.getAccidentHouseNumber(), extracted.getAccidentHouseNumber()));
+        merged.setAccidentDetails(mergeScalar(current.getAccidentDetails(), extracted.getAccidentDetails()));
+        merged.setAccidentReportNumber(mergeScalar(current.getAccidentReportNumber(), extracted.getAccidentReportNumber()));
+
+        // --- Miscellaneous damages ---
+        merged.setMiscellaneousDamages(mergeEnum(current.getMiscellaneousDamages(), extracted.getMiscellaneousDamages()));
+        merged.setMiscellaneousDamageDescription(mergeScalar(current.getMiscellaneousDamageDescription(), extracted.getMiscellaneousDamageDescription()));
+
+        // --- Injured ---
+        merged.setHasInjured(mergeEnum(current.getHasInjured(), extracted.getHasInjured()));
+        merged.setInjuredCount(mergeScalar(current.getInjuredCount(), extracted.getInjuredCount()));
+
+        // --- Witnesses ---
+        merged.setHasWitnesses(mergeEnum(current.getHasWitnesses(), extracted.getHasWitnesses()));
+        merged.setWitnessesCount(mergeScalar(current.getWitnessesCount(), extracted.getWitnessesCount()));
+        merged.setWitnesses(mergeWitnesses(current.getWitnesses(), extracted.getWitnesses()));
+
+        // --- Insurance holder A ---
+        merged.setInsuranceHolderSalutation(mergeScalar(current.getInsuranceHolderSalutation(), extracted.getInsuranceHolderSalutation()));
+        merged.setInsuranceHolderTitle(mergeScalar(current.getInsuranceHolderTitle(), extracted.getInsuranceHolderTitle()));
+        merged.setInsuranceHolderName(mergeScalar(current.getInsuranceHolderName(), extracted.getInsuranceHolderName()));
+        merged.setInsuranceHolderSurName(mergeScalar(current.getInsuranceHolderSurName(), extracted.getInsuranceHolderSurName()));
+        merged.setInsuranceHolderStreetName(mergeScalar(current.getInsuranceHolderStreetName(), extracted.getInsuranceHolderStreetName()));
+        merged.setInsuranceHolderHouseNumber(mergeScalar(current.getInsuranceHolderHouseNumber(), extracted.getInsuranceHolderHouseNumber()));
+        merged.setInsuranceHolderPostalCode(mergeScalar(current.getInsuranceHolderPostalCode(), extracted.getInsuranceHolderPostalCode()));
+        merged.setInsuranceHolderCity(mergeScalar(current.getInsuranceHolderCity(), extracted.getInsuranceHolderCity()));
+        merged.setInsuranceHolderTelephone(mergeScalar(current.getInsuranceHolderTelephone(), extracted.getInsuranceHolderTelephone()));
+        merged.setInsuranceHolderEmail(mergeScalar(current.getInsuranceHolderEmail(), extracted.getInsuranceHolderEmail()));
+        merged.setVatDeduction(mergeEnum(current.getVatDeduction(), extracted.getVatDeduction()));
+        merged.setCarBrand(mergeScalar(current.getCarBrand(), extracted.getCarBrand()));
+        merged.setCarModel(mergeScalar(current.getCarModel(), extracted.getCarModel()));
+        merged.setLicensePlate(mergeScalar(current.getLicensePlate(), extracted.getLicensePlate()));
+        merged.setInsuranceCompany(mergeScalar(current.getInsuranceCompany(), extracted.getInsuranceCompany()));
+        merged.setInsuranceNumber(mergeScalar(current.getInsuranceNumber(), extracted.getInsuranceNumber()));
+        merged.setChassisNumber(mergeScalar(current.getChassisNumber(), extracted.getChassisNumber()));
+        merged.setOdometerReading(mergeScalar(current.getOdometerReading(), extracted.getOdometerReading()));
+        merged.setGreenCardNumber(mergeScalar(current.getGreenCardNumber(), extracted.getGreenCardNumber()));
+        merged.setValidDateGreenCard(mergeScalar(current.getValidDateGreenCard(), extracted.getValidDateGreenCard()));
+        merged.setAllRiskInsurance(mergeEnum(current.getAllRiskInsurance(), extracted.getAllRiskInsurance()));
+
+        // --- Insurance holder B ---
+        merged.setOtherInsuranceHolderSalutation(mergeScalar(current.getOtherInsuranceHolderSalutation(), extracted.getOtherInsuranceHolderSalutation()));
+        merged.setOtherInsuranceHolderTitle(mergeScalar(current.getOtherInsuranceHolderTitle(), extracted.getOtherInsuranceHolderTitle()));
+        merged.setOtherInsuranceHolderName(mergeScalar(current.getOtherInsuranceHolderName(), extracted.getOtherInsuranceHolderName()));
+        merged.setOtherInsuranceHolderSurName(mergeScalar(current.getOtherInsuranceHolderSurName(), extracted.getOtherInsuranceHolderSurName()));
+        merged.setOtherInsuranceHolderStreetName(mergeScalar(current.getOtherInsuranceHolderStreetName(), extracted.getOtherInsuranceHolderStreetName()));
+        merged.setOtherInsuranceHolderHouseNumber(mergeScalar(current.getOtherInsuranceHolderHouseNumber(), extracted.getOtherInsuranceHolderHouseNumber()));
+        merged.setOtherInsuranceHolderPostalCode(mergeScalar(current.getOtherInsuranceHolderPostalCode(), extracted.getOtherInsuranceHolderPostalCode()));
+        merged.setOtherInsuranceHolderCity(mergeScalar(current.getOtherInsuranceHolderCity(), extracted.getOtherInsuranceHolderCity()));
+        merged.setOtherInsuranceHolderTelephone(mergeScalar(current.getOtherInsuranceHolderTelephone(), extracted.getOtherInsuranceHolderTelephone()));
+        merged.setOtherInsuranceHolderEmail(mergeScalar(current.getOtherInsuranceHolderEmail(), extracted.getOtherInsuranceHolderEmail()));
+        merged.setOtherVatDeduction(mergeEnum(current.getOtherVatDeduction(), extracted.getOtherVatDeduction()));
+        merged.setOtherCarBrand(mergeScalar(current.getOtherCarBrand(), extracted.getOtherCarBrand()));
+        merged.setOtherCarModel(mergeScalar(current.getOtherCarModel(), extracted.getOtherCarModel()));
+        merged.setOtherLicensePlate(mergeScalar(current.getOtherLicensePlate(), extracted.getOtherLicensePlate()));
+        merged.setOtherInsuranceCompany(mergeScalar(current.getOtherInsuranceCompany(), extracted.getOtherInsuranceCompany()));
+        merged.setOtherInsuranceNumber(mergeScalar(current.getOtherInsuranceNumber(), extracted.getOtherInsuranceNumber()));
+        merged.setOtherChassisNumber(mergeScalar(current.getOtherChassisNumber(), extracted.getOtherChassisNumber()));
+        merged.setOtherOdometerReading(mergeScalar(current.getOtherOdometerReading(), extracted.getOtherOdometerReading()));
+        merged.setOtherGreenCardNumber(mergeScalar(current.getOtherGreenCardNumber(), extracted.getOtherGreenCardNumber()));
+        merged.setOtherValidDateGreenCard(mergeScalar(current.getOtherValidDateGreenCard(), extracted.getOtherValidDateGreenCard()));
+        merged.setOtherAllRiskInsurance(mergeEnum(current.getOtherAllRiskInsurance(), extracted.getOtherAllRiskInsurance()));
+
+        // --- Driver A ---
+        merged.setDriverSalutation(mergeScalar(current.getDriverSalutation(), extracted.getDriverSalutation()));
+        merged.setDriverName(mergeScalar(current.getDriverName(), extracted.getDriverName()));
+        merged.setDriverSurName(mergeScalar(current.getDriverSurName(), extracted.getDriverSurName()));
+        merged.setDriverStreetName(mergeScalar(current.getDriverStreetName(), extracted.getDriverStreetName()));
+        merged.setDriverHouseNumber(mergeScalar(current.getDriverHouseNumber(), extracted.getDriverHouseNumber()));
+        merged.setDriverPostalCode(mergeScalar(current.getDriverPostalCode(), extracted.getDriverPostalCode()));
+        merged.setDriverCity(mergeScalar(current.getDriverCity(), extracted.getDriverCity()));
+        merged.setDriverTelephone(mergeScalar(current.getDriverTelephone(), extracted.getDriverTelephone()));
+        merged.setDriverEmail(mergeScalar(current.getDriverEmail(), extracted.getDriverEmail()));
+        merged.setDriverDriverLicense(mergeScalar(current.getDriverDriverLicense(), extracted.getDriverDriverLicense()));
+        merged.setDriverLicenseIssuingAuthority(mergeScalar(current.getDriverLicenseIssuingAuthority(), extracted.getDriverLicenseIssuingAuthority()));
+        merged.setDriverDamagedParts(mergeStringList(current.getDriverDamagedParts(), extracted.getDriverDamagedParts()));
+        merged.setDamageDescription(mergeScalar(current.getDamageDescription(), extracted.getDamageDescription()));
+        merged.setAdditionalComments(mergeScalar(current.getAdditionalComments(), extracted.getAdditionalComments()));
+        merged.setVehicleOperational(mergeEnum(current.getVehicleOperational(), extracted.getVehicleOperational()));
+        merged.setDamageType(mergeScalar(current.getDamageType(), extracted.getDamageType()));
+
+        // --- Driver B ---
+        merged.setOtherDriverSalutation(mergeScalar(current.getOtherDriverSalutation(), extracted.getOtherDriverSalutation()));
+        merged.setOtherDriverName(mergeScalar(current.getOtherDriverName(), extracted.getOtherDriverName()));
+        merged.setOtherDriverSurName(mergeScalar(current.getOtherDriverSurName(), extracted.getOtherDriverSurName()));
+        merged.setOtherDriverStreetName(mergeScalar(current.getOtherDriverStreetName(), extracted.getOtherDriverStreetName()));
+        merged.setOtherDriverHouseNumber(mergeScalar(current.getOtherDriverHouseNumber(), extracted.getOtherDriverHouseNumber()));
+        merged.setOtherDriverPostalCode(mergeScalar(current.getOtherDriverPostalCode(), extracted.getOtherDriverPostalCode()));
+        merged.setOtherDriverCity(mergeScalar(current.getOtherDriverCity(), extracted.getOtherDriverCity()));
+        merged.setOtherDriverTelephone(mergeScalar(current.getOtherDriverTelephone(), extracted.getOtherDriverTelephone()));
+        merged.setOtherDriverEmail(mergeScalar(current.getOtherDriverEmail(), extracted.getOtherDriverEmail()));
+        merged.setOtherDriverDriverLicense(mergeScalar(current.getOtherDriverDriverLicense(), extracted.getOtherDriverDriverLicense()));
+        merged.setOtherDriverLicenseIssuingAuthority(mergeScalar(current.getOtherDriverLicenseIssuingAuthority(), extracted.getOtherDriverLicenseIssuingAuthority()));
+        merged.setOtherDriverDamagedParts(mergeStringList(current.getOtherDriverDamagedParts(), extracted.getOtherDriverDamagedParts()));
+        merged.setOtherDamageDescription(mergeScalar(current.getOtherDamageDescription(), extracted.getOtherDamageDescription()));
+        merged.setOtherAdditionalComments(mergeScalar(current.getOtherAdditionalComments(), extracted.getOtherAdditionalComments()));
+        merged.setOtherVehicleOperational(mergeEnum(current.getOtherVehicleOperational(), extracted.getOtherVehicleOperational()));
+        merged.setOtherDamageType(mergeScalar(current.getOtherDamageType(), extracted.getOtherDamageType()));
 
         return merged;
     }
@@ -53,101 +138,28 @@ public class ClaimsDataMerger {
         return extracted != null ? extracted : current;
     }
 
-    private List<Witness> mergeWitnesses(List<Witness> current, List<Witness> extracted) {
+    private <E extends Enum<E>> E mergeEnum(E current, E extracted) {
+        return extracted != null ? extracted : current;
+    }
+
+    private List<WitnessDetails> mergeWitnesses(List<WitnessDetails> current, List<WitnessDetails> extracted) {
         if (extracted == null || extracted.isEmpty()) {
             return current;
         }
-        List<Witness> result = current != null ? new ArrayList<>(current) : new ArrayList<>();
+        List<WitnessDetails> result = current != null ? new ArrayList<>(current) : new ArrayList<>();
         result.addAll(extracted);
         return result;
     }
 
-    private Person mergePerson(Person current, Person extracted) {
-        if (extracted == null) {
-            return current;
-        }
-        if (current == null) {
-            return extracted;
-        }
-        Person merged = new Person();
-        merged.setFormOfAddress(extracted.getFormOfAddress() != null ? extracted.getFormOfAddress() : current.getFormOfAddress());
-        merged.setTitle(extracted.getTitle() != null ? extracted.getTitle() : current.getTitle());
-        merged.setLastName(mergeScalar(current.getLastName(), extracted.getLastName()));
-        merged.setFirstName(mergeScalar(current.getFirstName(), extracted.getFirstName()));
-        merged.setPostalCode(mergeScalar(current.getPostalCode(), extracted.getPostalCode()));
-        merged.setCity(mergeScalar(current.getCity(), extracted.getCity()));
-        merged.setStreetName(mergeScalar(current.getStreetName(), extracted.getStreetName()));
-        merged.setStreetNumber(mergeScalar(current.getStreetNumber(), extracted.getStreetNumber()));
-        merged.setPhoneNumber(mergeScalar(current.getPhoneNumber(), extracted.getPhoneNumber()));
-        merged.setEmailAddress(mergeScalar(current.getEmailAddress(), extracted.getEmailAddress()));
-        return merged;
-    }
-
-    private Policyholder mergePolicyholder(Policyholder current, Policyholder extracted) {
-        if (extracted == null) {
-            return current;
-        }
-        if (current == null) {
-            return extracted;
-        }
-        Policyholder merged = new Policyholder();
-        merged.setPersonalInformation(mergePerson(current.getPersonalInformation(), extracted.getPersonalInformation()));
-        merged.setInputTaxDeduction(extracted.getInputTaxDeduction() != null ? extracted.getInputTaxDeduction() : current.getInputTaxDeduction());
-        merged.setVehicleMake(mergeScalar(current.getVehicleMake(), extracted.getVehicleMake()));
-        merged.setVehicleType(mergeScalar(current.getVehicleType(), extracted.getVehicleType()));
-        merged.setVehicleReg(mergeScalar(current.getVehicleReg(), extracted.getVehicleReg()));
-        merged.setInsuranceCompany(mergeScalar(current.getInsuranceCompany(), extracted.getInsuranceCompany()));
-        merged.setPolicyNumber(mergeScalar(current.getPolicyNumber(), extracted.getPolicyNumber()));
-        merged.setVin(mergeScalar(current.getVin(), extracted.getVin()));
-        merged.setCurrentMileage(extracted.getCurrentMileage() != null ? extracted.getCurrentMileage() : current.getCurrentMileage());
-        merged.setGreencardNumber(mergeScalar(current.getGreencardNumber(), extracted.getGreencardNumber()));
-        merged.setGreencardExpirydate(mergeScalar(current.getGreencardExpirydate(), extracted.getGreencardExpirydate()));
-        merged.setComprehensiveInsurance(extracted.getComprehensiveInsurance() != null ? extracted.getComprehensiveInsurance() : current.getComprehensiveInsurance());
-        return merged;
-    }
-
-    private List<DamagedImage> mergeDamagedImages(List<DamagedImage> current, List<DamagedImage> extracted) {
+    private List<String> mergeStringList(List<String> current, List<String> extracted) {
         if (extracted == null || extracted.isEmpty()) {
             return current;
         }
-        List<DamagedImage> result = current != null ? new ArrayList<>(current) : new ArrayList<>();
-        result.addAll(extracted);
-        return result;
-    }
-
-    private List<DamagedPart> mergeDamagedParts(List<DamagedPart> current, List<DamagedPart> extracted) {
-        if (extracted == null || extracted.isEmpty()) {
-            return current;
-        }
-        Set<DamagedPart> parts = new LinkedHashSet<>();
+        Set<String> parts = new LinkedHashSet<>();
         if (current != null) {
             parts.addAll(current);
         }
         parts.addAll(extracted);
         return new ArrayList<>(parts);
-    }
-
-    private VehicleDriver mergeVehicleDriver(VehicleDriver current, VehicleDriver extracted) {
-        if (extracted == null) {
-            return current;
-        }
-        if (current == null) {
-            return extracted;
-        }
-        VehicleDriver merged = new VehicleDriver();
-        merged.setPersonalInformation(mergePerson(current.getPersonalInformation(), extracted.getPersonalInformation()));
-        merged.setDriverLicensenumber(mergeScalar(current.getDriverLicensenumber(), extracted.getDriverLicensenumber()));
-        merged.setLicenseIssuedBy(mergeScalar(current.getLicenseIssuedBy(), extracted.getLicenseIssuedBy()));
-        merged.setDamagedCarImages(mergeDamagedImages(current.getDamagedCarImages(), extracted.getDamagedCarImages()));
-        merged.setDamagedWindowImages(mergeDamagedImages(current.getDamagedWindowImages(), extracted.getDamagedWindowImages()));
-        merged.setDriverDamagedpartsGraphic(mergeDamagedParts(current.getDriverDamagedpartsGraphic(), extracted.getDriverDamagedpartsGraphic()));
-        merged.setDriverVisibleDamage(mergeScalar(current.getDriverVisibleDamage(), extracted.getDriverVisibleDamage()));
-        merged.setDriverComments(mergeScalar(current.getDriverComments(), extracted.getDriverComments()));
-        merged.setVehicleDrivingAbility(extracted.getVehicleDrivingAbility() != null ? extracted.getVehicleDrivingAbility() : current.getVehicleDrivingAbility());
-        merged.setDamageCausedBy(extracted.getDamageCausedBy() != null ? extracted.getDamageCausedBy() : current.getDamageCausedBy());
-        merged.setTypeOfWildlife(mergeScalar(current.getTypeOfWildlife(), extracted.getTypeOfWildlife()));
-        merged.setCertificateForWildlife(mergeScalar(current.getCertificateForWildlife(), extracted.getCertificateForWildlife()));
-        merged.setGarageLocation(mergeScalar(current.getGarageLocation(), extracted.getGarageLocation()));
-        return merged;
     }
 }

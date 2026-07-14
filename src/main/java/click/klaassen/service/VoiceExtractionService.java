@@ -2,8 +2,10 @@ package click.klaassen.service;
 
 import click.klaassen.api.VoiceExtractionResponse;
 import click.klaassen.claims.model.Claimsdata;
+import click.klaassen.claims.model.enums.Language;
 import click.klaassen.exception.UpstreamAiException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.audio.Audio;
 import dev.langchain4j.model.audio.AudioTranscriptionModel;
@@ -52,7 +54,7 @@ public class VoiceExtractionService {
                     .build();
 
             AudioTranscriptionRequest.Builder requestBuilder = AudioTranscriptionRequest.builder(audio);
-            String whisperLanguage = language != null && !language.isBlank() ? language : DEFAULT_LANGUAGE;
+            String whisperLanguage = resolveWhisperLanguage(language);
             requestBuilder.language(whisperLanguage);
 
             return transcriptionModel.transcribe(requestBuilder.build()).text();
@@ -82,9 +84,24 @@ public class VoiceExtractionService {
             return null;
         }
         try {
-            return objectMapper.readValue(currentStateJson, Claimsdata.class);
+            ObjectMapper lenient = objectMapper.copy()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
+            return lenient.readValue(currentStateJson, Claimsdata.class);
         } catch (JsonProcessingException e) {
-            throw new jakarta.ws.rs.BadRequestException("Invalid currentState JSON");
+            LOG.warning("Could not parse currentState, ignoring: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private String resolveWhisperLanguage(String language) {
+        if (language == null || language.isBlank()) {
+            return DEFAULT_LANGUAGE;
+        }
+        try {
+            return Language.fromValue(language).getIsoCode();
+        } catch (IllegalArgumentException e) {
+            return DEFAULT_LANGUAGE;
         }
     }
 }

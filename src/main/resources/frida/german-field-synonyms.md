@@ -4,51 +4,50 @@ Map colloquial German from voice transcripts to exact schema field names and enu
 
 ## Person and roles
 
-| Spoken (German) | Schema path |
+| Spoken (German) | Schema field |
 |-----------------|-------------|
-| Ich heiße … / Mein Name ist … | policyholder.personalInformation.firstName / lastName; if driver: vehicleDriver.personalInformation.* |
-| Herr / Frau (Anrede) | *.personalInformation.formOfAddress → `Herr` or `Frau` |
-| Versicherungsnehmer, VN, Antragsteller | policyholder.* |
-| Fahrer, ich bin gefahren, selbst gefahren | vehicleDriver.* |
-| Unfallgegner, andere Partei, Fahrer B | otherVehicleDriver.* / otherPolicyholder.* (only when explicitly mentioned) |
-| Zeuge, Zeugin | witness[].personalInformation.* |
+| Ich heiße … / Mein Name ist … | insuranceHolderSurName / insuranceHolderName; if driver: driverSurName / driverName |
+| Herr / Frau (Anrede) | insuranceHolderSalutation, driverSalutation, etc. → `Herr` or `Frau` |
+| Versicherungsnehmer, VN, Antragsteller | insuranceHolder* fields |
+| Fahrer, ich bin gefahren, selbst gefahren | driver* fields |
+| Unfallgegner, andere Partei, Fahrer B | otherDriver* / otherInsuranceHolder* fields (only when explicitly mentioned) |
+| Zeuge, Zeugin | witnesses[] fields (salutation, name, surName, etc.) |
 
 ## Home vs accident location
 
-| Spoken | Schema path |
+| Spoken | Schema field |
 |--------|-------------|
-| Ich wohne in … / meine Adresse … | policyholder.personalInformation.city, postalCode, streetName, streetNumber |
-| Unfallort, Unfall war in …, passiert in … | accidentCity, accidentPostalCode, accidentStreetName, accidentStreetNumber |
-| Werkstatt, Garage | vehicleDriver.garageLocation |
+| Ich wohne in … / meine Adresse … | insuranceHolderCity, insuranceHolderPostalCode, insuranceHolderStreetName, insuranceHolderHouseNumber |
+| Unfallort, Unfall war in …, passiert in … | accidentCity, accidentPostalCode, accidentStreetName, accidentHouseNumber |
 
 ## Vehicle and insurance
 
-| Spoken | Schema path |
+| Spoken | Schema field |
 |--------|-------------|
-| Kennzeichen, Nummernschild, amtliches Kennzeichen, Kfz-Kennzeichen | policyholder.vehicleReg |
-| Marke, Automarke (BMW, VW, …) | policyholder.vehicleMake |
-| Modell, Fahrzeugtyp | policyholder.vehicleType |
-| Policennummer, Versicherungsschein, Police, Vertragsnummer | policyholder.policyNumber |
-| Versicherer, Versicherungsgesellschaft (HDI, Allianz, …) | policyholder.insuranceCompany |
-| Fahrgestellnummer, FIN, VIN | policyholder.vin |
-| Kilometerstand, km-Stand | policyholder.currentMileage (integer) |
-| Grüne Karte, Grüne-Karte-Nummer | policyholder.greencardNumber |
-| Vollkasko, Vollkaskoversichert | policyholder.comprehensiveInsurance |
-| Vorsteuerabzug | policyholder.inputTaxDeduction |
+| Kennzeichen, Nummernschild, amtliches Kennzeichen, Kfz-Kennzeichen | licensePlate |
+| Marke, Automarke (BMW, VW, …) | carBrand |
+| Modell, Fahrzeugtyp | carModel |
+| Policennummer, Versicherungsschein, Police, Vertragsnummer | insuranceNumber |
+| Versicherer, Versicherungsgesellschaft (HDI, Allianz, …) | insuranceCompany |
+| Fahrgestellnummer, FIN, VIN | chassisNumber |
+| Kilometerstand, km-Stand | odometerReading (integer) |
+| Grüne Karte, Grüne-Karte-Nummer | greenCardNumber |
+| Vollkasko, Vollkaskoversichert | allRiskInsurance |
+| Vorsteuerabzug | vatDeduction |
 
 ## Accident details
 
-| Spoken | Schema path |
+| Spoken | Schema field |
 |--------|-------------|
-| Unfallbeschreibung, was passiert ist, Hergang | accidentDescription |
+| Unfallbeschreibung, was passiert ist, Hergang | accidentDetails |
 | Unfalldatum, gestern, am … (date) | accidentDate (YYYY-MM-DD) |
 | Unfallzeit, gegen … Uhr, um … | accidentTime (HH:mm:ss) |
-| Polizei, Aktenzeichen, Unfallnummer Polizei | accidentPoliceNumber |
-| Sachschaden, andere Schäden | hasVehicleDamage, vehicleDamageDescription |
-| Verletzte, Verletzung | injuredPerson, injuredPersonNumber |
-| Zeugen, es gab Zeugen | witnessExists, witnessCount, witness[] |
+| Polizei, Aktenzeichen, Unfallnummer Polizei | accidentReportNumber |
+| Sachschaden, andere Schäden | miscellaneousDamages, miscellaneousDamageDescription |
+| Verletzte, Verletzung | hasInjured, injuredCount |
+| Zeugen, es gab Zeugen | hasWitnesses, witnessesCount, witnesses[] |
 
-## damageCausedBy (exact enum only when clearly stated)
+## damageType (exact enum only when clearly stated)
 
 | Spoken variants | Enum value |
 |-----------------|------------|
@@ -59,10 +58,10 @@ Map colloquial German from voice transcripts to exact schema field names and enu
 | von der Fahrbahn abgekommen | Abkommen von der Fahrbahn |
 | Überholen, Überholvorgang | Überholvorgang |
 | Spurwechsel, Spur gewechselt | Spurwechsel |
-| Wild, Reh, Wildunfall, Tier | damageCausedBy + typeOfWildlife when applicable |
+| Wild, Reh, Wildunfall, Tier | damageType + typeOfWildlife when applicable |
 | Sonstiges, weiß nicht genau | Sonstiges (only if cause explicitly uncertain) |
 
-## driverDamagedpartsGraphic (exact enum labels)
+## driverDamagedParts (exact enum labels)
 
 | Spoken | Enum value |
 |--------|------------|
@@ -82,9 +81,9 @@ Map colloquial German from voice transcripts to exact schema field names and enu
 | nein, nicht, keiner, keine | false |
 | weiß nicht, unklar, nicht sicher | not_specified |
 
-Tri-state fields: hasVehicleDamage, injuredPerson, witnessExists, comprehensiveInsurance, inputTaxDeduction, vehicleDrivingAbility, formOfAddress.
+Tri-state fields: miscellaneousDamages, hasInjured, hasWitnesses, allRiskInsurance, otherAllRiskInsurance, vatDeduction, otherVatDeduction, vehicleOperational, otherVehicleOperational, insuranceHolderSalutation.
 
 ## Do not map
 
-- licensePlateNumber, fullName, cityOfAccident, vehicleDriverFirstNames — invented fields; use schema paths above.
-- not_specified on damageCausedBy, language, title, driverDamagedpartsGraphic — omit instead.
+- licensePlateNumber, fullName, cityOfAccident, vehicleDriverFirstNames — invented fields; use schema fields above.
+- not_specified on damageType, language, title, driverDamagedParts — omit instead.

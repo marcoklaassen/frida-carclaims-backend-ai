@@ -25,13 +25,9 @@ public class ClaimsSchemaKnowledge {
     private static final String EXAMPLES_RESOURCE = "/frida/voice-extraction-examples.md";
     private static final int MAX_PROMPT_CHARS = 16_000;
 
-    private static final Set<String> EXCLUDED_FIELDS = Set.of(
-            "damagedCarImages",
-            "damagedWindowImages",
-            "certificateForWildlife");
+    private static final Set<String> EXCLUDED_FIELDS = Set.of();
 
     private static final String ROOT_SCHEMA = "Claimsdata";
-    private static final String PERSON_SCHEMA = "Person";
 
     private List<String> fullCatalogLines;
     private Map<String, StepConfig> stepConfigs;
@@ -274,12 +270,7 @@ public class ClaimsSchemaKnowledge {
 
             if (property.containsKey("$ref")) {
                 Map<String, Object> resolved = resolveSchema(schemas, property);
-                String schemaName = refSchemaName(property);
-                if (PERSON_SCHEMA.equals(schemaName)) {
-                    appendPersonFields(resolved, prefix, catalogLines);
-                } else {
-                    walkSchema(schemas, resolved, path + ".", catalogLines);
-                }
+                walkSchema(schemas, resolved, path + ".", catalogLines);
                 continue;
             }
 
@@ -297,23 +288,6 @@ public class ClaimsSchemaKnowledge {
 
             catalogLines.add(formatFieldLine(path, property, property));
         }
-    }
-
-    private void appendPersonFields(Map<String, Object> personSchema, String parentPrefix, List<String> catalogLines) {
-        Map<String, Object> properties = asMap(personSchema.get("properties"));
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            String path = parentPrefix + "personalInformation." + entry.getKey();
-            Map<String, Object> property = asMap(entry.getValue());
-            catalogLines.add(formatFieldLine(path, property, property));
-        }
-    }
-
-    private String refSchemaName(Map<String, Object> node) {
-        String ref = stringValue(node.get("$ref"));
-        if (ref == null) {
-            return null;
-        }
-        return ref.substring(ref.lastIndexOf('/') + 1);
     }
 
     @SuppressWarnings("unchecked")

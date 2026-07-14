@@ -1,5 +1,5 @@
-# Maps frontend stepKey (sessionStorage) to allowed Claimsdata JSON paths for voice extraction.
-# Prefixes ending with "." match nested paths (e.g. policyholder. → policyholder.vehicleReg).
+# Maps frontend stepKey (sessionStorage) to allowed flat field names for voice extraction.
+# All fields are now flat (no nested paths). Prefixes match the start of field names.
 steps:
   carclaimsDetails:
     hints: |
@@ -12,50 +12,80 @@ steps:
 
   insurance-holder-a:
     hints: |
-      - Versicherungsnehmer A: policyholder and own vehicle/insurance data.
-      - Home address phrases ("Ich wohne in …") map to policyholder.personalInformation.*.
+      - Versicherungsnehmer A: insurance holder and own vehicle/insurance data.
+      - Home address phrases ("Ich wohne in …") map to insuranceHolder* fields.
     allowedPathPrefixes:
-      - policyholder.
+      - insuranceHolder
+      - vatDeduction
+      - carBrand
+      - carModel
+      - licensePlate
+      - insuranceCompany
+      - insuranceNumber
+      - chassisNumber
+      - odometerReading
+      - greenCardNumber
+      - validDateGreenCard
+      - allRiskInsurance
 
   driver-a:
     hints: |
-      - Fahrer A (own driver): vehicleDriver.* including damage cause and damaged parts.
-      - If the speaker says they drove, also fill vehicleDriver.personalInformation.*.
+      - Fahrer A (own driver): driver* fields including damage cause and damaged parts.
+      - If the speaker says they drove, also fill driver* personal fields.
     allowedPathPrefixes:
-      - vehicleDriver.
+      - driver
+      - damageDescription
+      - additionalComments
+      - vehicleOperational
+      - damageType
 
   injuredDetails:
     hints: |
-      - Verletzte Personen: injuredPerson (tri-state) and injuredPersonNumber (count as string).
+      - Verletzte Personen: hasInjured (tri-state) and injuredCount (count as string).
     allowedPathPrefixes:
-      - injuredPerson
-      - injuredPersonNumber
+      - hasInjured
+      - injuredCount
 
   miscellaneousDamages:
     hints: |
-      - Weitere Sachschäden: hasVehicleDamage (tri-state) and vehicleDamageDescription.
+      - Weitere Sachschäden: miscellaneousDamages (tri-state) and miscellaneousDamageDescription.
     allowedPathPrefixes:
-      - hasVehicleDamage
-      - vehicleDamageDescription
+      - miscellaneousDamages
+      - miscellaneousDamageDescription
 
   insurance-holder-b:
     hints: |
       - Only populate when the transcript explicitly mentions the other party (Unfallgegner B).
-      - Versicherungsnehmer B → otherPolicyholder.*
+      - Versicherungsnehmer B → otherInsuranceHolder* fields and other* vehicle/insurance fields.
     allowedPathPrefixes:
-      - otherPolicyholder.
+      - otherInsuranceHolder
+      - otherVatDeduction
+      - otherCarBrand
+      - otherCarModel
+      - otherLicensePlate
+      - otherInsuranceCompany
+      - otherInsuranceNumber
+      - otherChassisNumber
+      - otherOdometerReading
+      - otherGreenCardNumber
+      - otherValidDateGreenCard
+      - otherAllRiskInsurance
 
   driver-b:
     hints: |
       - Only populate when the transcript explicitly mentions the other driver (Fahrer B).
-      - Fahrer B → otherVehicleDriver.*
+      - Fahrer B → otherDriver* fields and other* damage fields.
     allowedPathPrefixes:
-      - otherVehicleDriver.
+      - otherDriver
+      - otherDamageDescription
+      - otherAdditionalComments
+      - otherVehicleOperational
+      - otherDamageType
 
   witness:
     hints: |
-      - Zeugen: witnessExists, witnessCount, witness[] with personalInformation per witness.
+      - Zeugen: hasWitnesses, witnessesCount, witnesses[] with flat fields per witness (salutation, name, surName, etc.).
     allowedPathPrefixes:
-      - witnessExists
-      - witnessCount
-      - witness
+      - hasWitnesses
+      - witnessesCount
+      - witnesses
