@@ -1,12 +1,12 @@
 # frida-carclaims-voice-backend
 
-Quarkus backend for the FRIDA Car Claims voice-to-form feature. Accepts browser-recorded audio, transcribes it with Whisper, and maps spoken content to the [FRIDA Car Claims Data Schema](https://github.com/FRIDA-api/frida-carclaims-frontend/blob/main/claimsOas.yaml) using Qwen via LiteLLM and langchain4j.
+Quarkus backend for the FRIDA Car Claims voice-to-form feature. Accepts browser-recorded audio, transcribes it with Whisper, and maps spoken content to the [FRIDA Car Claims Data Schema](https://github.com/FRIDA-api/frida-carclaims-frontend/blob/main/claimsOas.yaml) using Qwen via Chat API and langchain4j.
 
 ## Prerequisites
 
 - Java 21
 - Maven (wrapper included)
-- LiteLLM API key (for claims extraction)
+- Chat API API key (for claims extraction)
 - OpenAI API key (for speech-to-text transcription)
 
 ## Configuration
@@ -15,15 +15,15 @@ The backend uses **two external API services**:
 
 | Service | Purpose | Env vars |
 |---------|---------|----------|
-| **LiteLLM** | Claims field extraction (Qwen3.6-35B-A3B) | `LITELLM_BASE_URL`, `LITELLM_API_KEY`, `CHAT_MODEL`, `LITELLM_TIMEOUT` (default `120s`) |
+| **Chat API** | Claims field extraction (Qwen3.6-35B-A3B) | `CHAT_BASE_URL`, `CHAT_API_KEY`, `CHAT_MODEL`, `CHAT_TIMEOUT` (default `120s`) |
 | **OpenAI Whisper** | Speech-to-text transcription | `TRANSCRIPTION_BASE_URL`, `TRANSCRIPTION_API_KEY`, `TRANSCRIPTION_MODEL` (default `whisper-1`) |
 
 Example:
 
 ```shell
-# LiteLLM for claims extraction
-export LITELLM_BASE_URL=https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com/v1/
-export LITELLM_API_KEY=sk-...
+# Chat API for claims extraction
+export CHAT_BASE_URL=https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com/v1/
+export CHAT_API_KEY=sk-...
 export CHAT_MODEL=Qwen3.6-35B-A3B
 
 # OpenAI Whisper for transcription
@@ -78,7 +78,7 @@ Only non-null fields are returned in `claimsData`. The frontend should merge thi
 | Status | Cause |
 |--------|-------|
 | 400 | Missing or empty audio, invalid `currentState` JSON |
-| 502 | Whisper transcription or LiteLLM extraction failed |
+| 502 | Whisper transcription or Chat API extraction failed |
 | 500 | Unexpected server error |
 
 **Example (curl):**
@@ -94,7 +94,7 @@ curl -X POST http://localhost:8080/api/voice/extract \
 ## Architecture
 
 1. **Speech-to-text** — OpenAI Whisper API via `POST /v1/audio/transcriptions`
-2. **Schema mapping** — Qwen3.6-35B-A3B via LiteLLM with thinking disabled (`enable_thinking: false`), temperature 0.1, and manual JSON parsing. The system prompt is built from vendored FRIDA resources under `src/main/resources/frida/` (`claimsOas.yaml`, `descriptionClaim.md`, `voice-mapping-hints.md`, `step-field-catalog.yaml`, `german-field-synonyms.md`, `voice-extraction-examples.md`). When the frontend sends `stepKey`, only fields for that form step are included in the catalog.
+2. **Schema mapping** — Qwen3.6-35B-A3B via Chat API with thinking disabled (`enable_thinking: false`), temperature 0.1, and manual JSON parsing. The system prompt is built from vendored FRIDA resources under `src/main/resources/frida/` (`claimsOas.yaml`, `descriptionClaim.md`, `voice-mapping-hints.md`, `step-field-catalog.yaml`, `german-field-synonyms.md`, `voice-extraction-examples.md`). When the frontend sends `stepKey`, only fields for that form step are included in the catalog.
 3. **Merge** — Java `ClaimsDataMerger` deep-merges extracted fields into optional `currentState`
 
 ### Schema resources
@@ -166,8 +166,8 @@ Pull the image locally:
 ```shell
 docker pull quay.io/mklaasse/frida-carclaims-backend-ai:latest
 docker run --rm -p 8080:8080 \
-  -e LITELLM_BASE_URL=https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com/v1/ \
-  -e LITELLM_API_KEY=sk-... \
+  -e CHAT_BASE_URL=https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com/v1/ \
+  -e CHAT_API_KEY=sk-... \
   -e TRANSCRIPTION_BASE_URL=https://api.openai.com/v1/ \
   -e TRANSCRIPTION_API_KEY=sk-proj-... \
   quay.io/mklaasse/frida-carclaims-backend-ai:latest

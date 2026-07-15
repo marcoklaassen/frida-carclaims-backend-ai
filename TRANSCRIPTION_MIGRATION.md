@@ -8,11 +8,11 @@ The backend now supports **OpenAI-compatible audio transcription APIs** in addit
 
 ### Before
 - **Speech-to-Text**: In-cluster whisper.cpp container
-- **Data Extraction**: External LLM via LiteLLM (Qwen3.6-35B-A3B)
+- **Data Extraction**: External LLM via Chat API (Qwen3.6-35B-A3B)
 
 ### After
 - **Speech-to-Text**: OpenAI-compatible API (external)
-- **Data Extraction**: External LLM via LiteLLM (unchanged)
+- **Data Extraction**: External LLM via Chat API (unchanged)
 
 ## Configuration
 
@@ -43,7 +43,7 @@ Create a secret with your OpenAI API key:
 
 ```bash
 oc create secret generic voice-backend-secrets \
-  --from-literal=LITELLM_API_KEY='sk-...' \
+  --from-literal=CHAT_API_KEY='sk-...' \
   --from-literal=TRANSCRIPTION_API_KEY='sk-...' \
   -n frida-carclaims-dev
 ```
@@ -100,19 +100,19 @@ Add the transcription API key to your secrets:
 ```bash
 # Development
 oc create secret generic voice-backend-secrets \
-  --from-literal=LITELLM_API_KEY='your-litellm-key' \
+  --from-literal=CHAT_API_KEY='your-chat-key' \
   --from-literal=TRANSCRIPTION_API_KEY='your-openai-key' \
   --dry-run=client -o yaml | oc apply -f - -n frida-carclaims-dev
 
 # Stage
 oc create secret generic voice-backend-secrets \
-  --from-literal=LITELLM_API_KEY='your-litellm-key' \
+  --from-literal=CHAT_API_KEY='your-chat-key' \
   --from-literal=TRANSCRIPTION_API_KEY='your-openai-key' \
   --dry-run=client -o yaml | oc apply -f - -n frida-carclaims-stage
 
 # Production
 oc create secret generic voice-backend-secrets \
-  --from-literal=LITELLM_API_KEY='your-litellm-key' \
+  --from-literal=CHAT_API_KEY='your-chat-key' \
   --from-literal=TRANSCRIPTION_API_KEY='your-openai-key' \
   --dry-run=client -o yaml | oc apply -f - -n frida-carclaims-prod
 ```

@@ -52,8 +52,8 @@ export TRANSCRIPTION_BASE_URL="https://api.openai.com/v1/"
 export TRANSCRIPTION_API_KEY="sk-your-openai-key"
 export TRANSCRIPTION_MODEL="whisper-1"
 
-export LITELLM_BASE_URL="https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com/v1/"
-export LITELLM_API_KEY="sk-your-litellm-key"
+export CHAT_BASE_URL="https://litellm-litemaas.apps.prod.rhoai.rh-aiservices-bu.com/v1/"
+export CHAT_API_KEY="sk-your-chat-key"
 export CHAT_MODEL="Qwen3.6-35B-A3B"
 ```
 
