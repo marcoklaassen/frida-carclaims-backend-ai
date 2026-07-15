@@ -17,7 +17,6 @@ import jakarta.inject.Inject;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
@@ -54,8 +53,6 @@ public class ClaimsFieldExtractor {
                     .parameters(OpenAiChatRequestParameters.builder()
                             .temperature(EXTRACTION_TEMPERATURE)
                             .responseFormat(ResponseFormat.JSON)
-                            .customParameters(Map.of(
-                                    "chat_template_kwargs", Map.of("enable_thinking", false)))
                             .build())
                     .build());
 
