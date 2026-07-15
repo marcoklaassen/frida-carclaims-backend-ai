@@ -60,7 +60,8 @@ public final class ClaimsJsonParser {
     public static Claimsdata parse(ObjectMapper objectMapper, String text) throws JsonProcessingException {
         String json = extractJson(text);
         ObjectMapper lenient = objectMapper.copy()
-                .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true);
+                .configure(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
+                .configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         String sanitized = sanitizeLlmPlaceholders(lenient, json);
         return lenient.readValue(sanitized, Claimsdata.class);
     }
