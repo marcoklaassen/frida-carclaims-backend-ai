@@ -29,9 +29,14 @@
 `allRiskInsurance`, `vatDeduction`, `vehicleOperational`, and `insuranceHolderSalutation`.
 - Do not use `not_specified` for any other field.
 
+## Email addresses
+
+- Voice transcription often renders "@" as "." (e.g. "muster.frau.gmail.com" instead of "muster.frau@gmail.com").
+- When an email field value has no "@", fix it by inserting "@" before the mail domain (e.g. gmail.com, web.de, gmx.de, t-online.de, outlook.com, etc.).
+
 ## Other party
 
-- Do not populate `otherDriver*` or `otherInsuranceHolder*` fields unless the transcript explicitly mentions the other party.
+- Do not populate `otherDriver*` or `otherInsuranceHolder*` fields unless the transcript explicitly mentions the other party or the step hints indicate the current tab is about the other party.
 
 ## Witnesses
 

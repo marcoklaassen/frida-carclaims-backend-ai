@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 @QuarkusTest
 class ClaimsSchemaKnowledgeTest {
 
-    private static final int MAX_PROMPT_CHARS = 16_000;
+    private static final int MAX_PROMPT_CHARS = 24_000;
 
     @Inject
     ClaimsSchemaKnowledge schemaKnowledge;
@@ -95,5 +95,33 @@ class ClaimsSchemaKnowledgeTest {
         assertTrue(unknown.contains("licensePlate |"));
         assertFalse(full.contains("German field synonyms"));
         assertFalse(unknown.contains("German field synonyms"));
+    }
+
+    @Test
+    void stepPromptContainsPriorityAndOtherFieldsSections() {
+        String section = schemaKnowledge.getSchemaPromptSection("driver-a");
+
+        assertTrue(section.contains("Priority fields for this step"));
+        assertTrue(section.contains("Other available fields"));
+    }
+
+    @Test
+    void stepPromptOtherFieldsIncludesNonStepFields() {
+        String section = schemaKnowledge.getSchemaPromptSection("driver-a");
+
+        assertTrue(section.contains("accidentCity"));
+        assertTrue(section.contains("licensePlate"));
+    }
+
+    @Test
+    void stepPromptPriorityFieldsContainStepFields() {
+        String section = schemaKnowledge.getSchemaPromptSection("driver-a");
+        String prioritySection = section.substring(
+                section.indexOf("Priority fields"),
+                section.indexOf("Other available fields"));
+
+        assertTrue(prioritySection.contains("damageType |"));
+        assertTrue(prioritySection.contains("driverDamagedParts |"));
+        assertFalse(prioritySection.contains("accidentCity |"));
     }
 }

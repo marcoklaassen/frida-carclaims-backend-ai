@@ -3,7 +3,7 @@
 steps:
   carclaimsDetails:
     hints: |
-      - This step captures the accident (Unfall), not the policyholder home address.
+      - The user is on the accident details tab.
       - "Ort", "Straße", "PLZ" on this page mean accidentCity, accidentStreetName, accidentPostalCode.
       - Map spoken German dates to YYYY-MM-DD and times to HH:mm:ss.
     allowedPathPrefixes:
@@ -12,8 +12,10 @@ steps:
 
   insurance-holder-a:
     hints: |
-      - Versicherungsnehmer A: insurance holder and own vehicle/insurance data.
-      - Home address phrases ("Ich wohne in …") map to insuranceHolder* fields.
+      - The user is on THEIR OWN personal info and vehicle tab (Versicherungsnehmer A).
+      - ALL spoken personal data (name, address, phone, email) goes to insuranceHolder* fields.
+      - ALL spoken vehicle/insurance data goes to carBrand, carModel, licensePlate, insuranceCompany, insuranceNumber, etc.
+      - Do NOT use otherInsuranceHolder* or otherDriver* fields here.
     allowedPathPrefixes:
       - insuranceHolder
       - vatDeduction
@@ -30,8 +32,11 @@ steps:
 
   driver-a:
     hints: |
-      - Fahrer A (own driver): driver* fields including damage cause and damaged parts.
-      - If the speaker says they drove, also fill driver* personal fields.
+      - The user is on THEIR OWN driver and damage tab (Fahrer A).
+      - ALL spoken driver personal data goes to driver* fields (driverName, driverSurName, etc.).
+      - ALL spoken damage info goes to damageType, driverDamagedParts, damageDescription, etc.
+      - If the speaker says they drove themselves, also fill driver* personal fields.
+      - Do NOT use otherDriver* fields here.
     allowedPathPrefixes:
       - driver
       - damageDescription
@@ -41,22 +46,26 @@ steps:
 
   injuredDetails:
     hints: |
-      - Verletzte Personen: hasInjured (tri-state) and injuredCount (count as string).
+      - The user is on the injured persons tab.
+      - hasInjured (tri-state) and injuredCount (count as string).
     allowedPathPrefixes:
       - hasInjured
       - injuredCount
 
   miscellaneousDamages:
     hints: |
-      - Weitere Sachschäden: miscellaneousDamages (tri-state) and miscellaneousDamageDescription.
+      - The user is on the other property damage tab.
+      - miscellaneousDamages (tri-state) and miscellaneousDamageDescription.
     allowedPathPrefixes:
       - miscellaneousDamages
       - miscellaneousDamageDescription
 
   insurance-holder-b:
     hints: |
-      - Only populate when the transcript explicitly mentions the other party (Unfallgegner B).
-      - Versicherungsnehmer B → otherInsuranceHolder* fields and other* vehicle/insurance fields.
+      - The user is on the OTHER PARTY's personal info and vehicle tab (Unfallbeteiligte:r B / Versicherungsnehmer B).
+      - ALL spoken personal data (name, address, phone, email) goes to otherInsuranceHolder* fields.
+      - ALL spoken vehicle/insurance data goes to otherCarBrand, otherCarModel, otherLicensePlate, otherInsuranceCompany, otherInsuranceNumber, etc.
+      - Do NOT use insuranceHolder* or driver* fields here — everything on this tab is about the other party.
     allowedPathPrefixes:
       - otherInsuranceHolder
       - otherVatDeduction
@@ -73,8 +82,10 @@ steps:
 
   driver-b:
     hints: |
-      - Only populate when the transcript explicitly mentions the other driver (Fahrer B).
-      - Fahrer B → otherDriver* fields and other* damage fields.
+      - The user is on the OTHER PARTY's driver and damage tab (Fahrer B / Unfallgegner).
+      - ALL spoken driver personal data goes to otherDriver* fields (otherDriverName, otherDriverSurName, etc.).
+      - ALL spoken damage info goes to otherDamageType, otherDriverDamagedParts, otherDamageDescription, etc.
+      - Do NOT use driver* or insuranceHolder* fields here — everything on this tab is about the other party.
     allowedPathPrefixes:
       - otherDriver
       - otherDamageDescription
@@ -84,6 +95,7 @@ steps:
 
   witness:
     hints: |
+      - The user is on the witnesses tab.
       - Zeugen: hasWitnesses, witnessesCount, witnesses[] with flat fields per witness (salutation, name, surName, etc.).
     allowedPathPrefixes:
       - hasWitnesses

@@ -24,7 +24,10 @@ final class ClaimsSchemaPrompt {
             the other party.
             - The value not_specified is ONLY valid for tri-state yes/no fields and salutation fields. Never use it for \
             damageType, language, title, or driverDamagedParts — omit those fields instead.
-            - When a step-specific field catalog is provided, extract ONLY fields from that catalog.
+            - When priority fields are provided, ALWAYS assign information to a priority field first. \
+            Only use a field from "Other available fields" when the information clearly does not match \
+            any priority field. Never overwrite data in fields the user has already filled (visible in \
+            currentState) unless the transcript explicitly corrects that field.
 
             """;
 }

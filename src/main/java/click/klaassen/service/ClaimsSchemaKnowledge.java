@@ -23,7 +23,7 @@ public class ClaimsSchemaKnowledge {
     private static final String STEP_CATALOG_RESOURCE = "/frida/step-field-catalog.yaml";
     private static final String SYNONYMS_RESOURCE = "/frida/german-field-synonyms.md";
     private static final String EXAMPLES_RESOURCE = "/frida/voice-extraction-examples.md";
-    private static final int MAX_PROMPT_CHARS = 16_000;
+    private static final int MAX_PROMPT_CHARS = 24_000;
 
     private static final Set<String> EXCLUDED_FIELDS = Set.of();
 
@@ -80,22 +80,23 @@ public class ClaimsSchemaKnowledge {
     }
 
     private String buildStepPrompt(String stepKey, StepConfig step) {
-        List<String> catalogLines = filterCatalogLines(fullCatalogLines, step.allowedPathPrefixes());
+        List<String> priorityLines = filterCatalogLines(fullCatalogLines, step.allowedPathPrefixes());
+        List<String> otherLines = excludeCatalogLines(fullCatalogLines, step.allowedPathPrefixes());
         String examples = examplesForStep(stepKey);
 
         StringBuilder prompt = new StringBuilder();
         prompt.append("Domain context:\n");
         prompt.append(domainContext);
-        prompt.append("\n\nFRIDA Claimsdata field catalog (use ONLY these exact JSON paths and field names):\n");
 
-        int fixedPrefixLength = estimateStepFixedSectionsLength(step, stepKey, examples);
-        List<String> fittedCatalog = fitCatalogLines(catalogLines, fixedPrefixLength);
-        fittedCatalog.forEach(line -> prompt.append("- ").append(line).append('\n'));
-        if (fittedCatalog.size() < catalogLines.size()) {
-            prompt.append("- (catalog truncated: ")
-                    .append(catalogLines.size() - fittedCatalog.size())
-                    .append(" fields omitted)\n");
-        }
+        prompt.append("\n\nPriority fields for this step (assign information here first):\n");
+        int fixedPrefixLength = estimateStepFixedSectionsLength(step, stepKey, examples, otherLines);
+        List<String> fittedPriority = fitCatalogLines(priorityLines, fixedPrefixLength);
+        fittedPriority.forEach(line -> prompt.append("- ").append(line).append('\n'));
+
+        String compactOther = compactFieldList(otherLines);
+        prompt.append("\nOther available fields (use ONLY when information clearly does not match any priority field):\n");
+        prompt.append(compactOther);
+        prompt.append('\n');
 
         if (step.hints() != null && !step.hints().isBlank()) {
             prompt.append("\nStep-specific hints (").append(stepKey).append("):\n");
@@ -122,11 +123,13 @@ public class ClaimsSchemaKnowledge {
         return result;
     }
 
-    private int estimateStepFixedSectionsLength(StepConfig step, String stepKey, String examples) {
+    private int estimateStepFixedSectionsLength(StepConfig step, String stepKey, String examples,
+            List<String> otherLines) {
         int length = domainContext.length()
                 + voiceHints.length()
                 + germanSynonyms.length()
                 + examples.length()
+                + compactFieldList(otherLines).length()
                 + 512;
         if (step.hints() != null) {
             length += step.hints().length() + stepKey.length() + 64;
@@ -192,6 +195,25 @@ public class ClaimsSchemaKnowledge {
             }
         }
         return filtered;
+    }
+
+    private List<String> excludeCatalogLines(List<String> catalogLines, List<String> allowedPrefixes) {
+        List<String> excluded = new ArrayList<>();
+        for (String line : catalogLines) {
+            String path = line.substring(0, line.indexOf(" | "));
+            if (!matchesAllowedPath(path, allowedPrefixes)) {
+                excluded.add(line);
+            }
+        }
+        return excluded;
+    }
+
+    private String compactFieldList(List<String> catalogLines) {
+        List<String> fieldNames = new ArrayList<>();
+        for (String line : catalogLines) {
+            fieldNames.add(line.substring(0, line.indexOf(" | ")));
+        }
+        return String.join(", ", fieldNames);
     }
 
     private boolean matchesAllowedPath(String path, List<String> allowedPrefixes) {

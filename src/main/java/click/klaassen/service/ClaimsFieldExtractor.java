@@ -20,12 +20,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ApplicationScoped
 public class ClaimsFieldExtractor {
 
     private static final Logger LOG = Logger.getLogger(ClaimsFieldExtractor.class.getName());
     private static final double EXTRACTION_TEMPERATURE = 0.1;
+    private static final Pattern EMAIL_DOMAIN_FIX = Pattern.compile(
+            "\\.([-\\w]+\\.(?:com|de|net|org|io|eu|at|ch|info|biz))$");
 
     @Inject
     ClaimsSchemaKnowledge schemaKnowledge;
@@ -61,7 +65,9 @@ public class ClaimsFieldExtractor {
                     + ", stepKey=" + (stepKey != null ? stepKey : "(none)"));
             String json = ClaimsJsonParser.extractJson(text);
             logUnknownTopLevelFields(json);
-            return ClaimsJsonParser.parse(objectMapper, json);
+            Claimsdata result = ClaimsJsonParser.parse(objectMapper, json);
+            fixEmailFields(result);
+            return result;
         } catch (JsonProcessingException | IllegalArgumentException e) {
             LOG.warning("Failed to parse claims JSON from LLM response: " + e.getMessage());
             throw new UpstreamAiException("Claims extraction failed: invalid JSON from LLM", e);
@@ -91,6 +97,31 @@ public class ClaimsFieldExtractor {
         } catch (JsonProcessingException e) {
             LOG.fine("Could not inspect LLM JSON for unknown fields: " + e.getMessage());
         }
+    }
+
+    private void fixEmailFields(Claimsdata data) {
+        data.setInsuranceHolderEmail(fixEmail(data.getInsuranceHolderEmail()));
+        data.setOtherInsuranceHolderEmail(fixEmail(data.getOtherInsuranceHolderEmail()));
+        data.setDriverEmail(fixEmail(data.getDriverEmail()));
+        data.setOtherDriverEmail(fixEmail(data.getOtherDriverEmail()));
+        if (data.getWitnesses() != null) {
+            for (var witness : data.getWitnesses()) {
+                witness.setEmail(fixEmail(witness.getEmail()));
+            }
+        }
+    }
+
+    String fixEmail(String value) {
+        if (value == null || value.contains("@")) {
+            return value;
+        }
+        Matcher m = EMAIL_DOMAIN_FIX.matcher(value);
+        if (m.find()) {
+            String fixed = m.replaceFirst("@$1");
+            LOG.info("Fixed transcribed email: " + value + " → " + fixed);
+            return fixed;
+        }
+        return value;
     }
 
     private Set<String> knownTopLevelFields() {
