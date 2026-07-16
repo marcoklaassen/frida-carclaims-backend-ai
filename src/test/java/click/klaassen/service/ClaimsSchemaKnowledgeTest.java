@@ -32,7 +32,7 @@ class ClaimsSchemaKnowledgeTest {
 
         assertTrue(section.contains("miscellaneousDamages"));
         assertTrue(section.contains("enum: not_specified, false, true"));
-        assertTrue(section.contains("enum: Auffahren, Rangieren/Parken"));
+        assertTrue(section.contains("enum: Auffahren, Rangieren/ Parken"));
     }
 
     @Test

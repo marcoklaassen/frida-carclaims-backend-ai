@@ -21,7 +21,7 @@
 
 - Description → `accidentDetails`. Date → `accidentDate` (YYYY-MM-DD). Time → `accidentTime` (HH:mm:ss).
 - Police ref → `accidentReportNumber`. Cause → `damageType` (exact enum only when stated).
-- `damageType` accepts only Schadenursache values (Auffahren, Rangieren/Parken, …). Omit when not stated — never `not_specified`.
+- `damageType` accepts only Schadenursache values (Auffahren, Rangieren/ Parken, …). Omit when not stated — never `not_specified`.
 
 ## Tri-state fields only
 

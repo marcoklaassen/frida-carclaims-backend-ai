@@ -44,11 +44,25 @@ JSON:
 {"damageType":"Auffahren","damageDescription":"Schaden an der Front"}
 ```
 
-### Example: driver-a — damaged part
+### Example: driver-a — damaged part (single)
 Transcript: "Die Motorhaube ist eingedrückt."
 JSON:
 ```json
-{"driverDamagedParts":"Motorhaube","damageDescription":"Motorhaube eingedrückt"}
+{"driverDamagedParts":["Motorhaube"],"damageDescription":"Motorhaube eingedrückt"}
+```
+
+### Example: driver-a — damaged parts (multiple)
+Transcript: "Schaden an der Fahrertür und am Kotflügel links."
+JSON:
+```json
+{"driverDamagedParts":["Fahrertür (vorne links)","Kotflügel links"]}
+```
+
+### Example: driver-a — damage cause with parts
+Transcript: "Bin beim Einparken gegen die Stoßstange hinten gefahren, auch der Heckscheinwerfer rechts ist kaputt."
+JSON:
+```json
+{"damageType":"Rangieren/ Parken","driverDamagedParts":["Hinterer Stoßfänger","Heckscheinwerfer rechts"]}
 ```
 
 ### Example: injuredDetails — no injuries

@@ -52,7 +52,7 @@ Map colloquial German from voice transcripts to exact schema field names and enu
 | Spoken variants | Enum value |
 |-----------------|------------|
 | Auffahren, aufgefahren, Heckschaden durch Auffahren | Auffahren |
-| Rangieren, Parken, beim Einparken | Rangieren/Parken |
+| Rangieren, Parken, beim Einparken | Rangieren/ Parken |
 | Vorfahrt missachtet, Vorfahrt nicht beachtet | Missachtung der Vorfahrt |
 | Abbiegen, beim Abbiegen | Abbiegen |
 | von der Fahrbahn abgekommen | Abkommen von der Fahrbahn |
@@ -61,17 +61,48 @@ Map colloquial German from voice transcripts to exact schema field names and enu
 | Wild, Reh, Wildunfall, Tier | damageType + typeOfWildlife when applicable |
 | Sonstiges, weiß nicht genau | Sonstiges (only if cause explicitly uncertain) |
 
-## driverDamagedParts (exact enum labels)
+## driverDamagedParts (exact enum labels — use ONLY these values)
 
-| Spoken | Enum value |
-|--------|------------|
-| vorne links / rechts | vorne links, vorne rechts |
-| Stoßstange vorne / hinten | vorne links or vorne rechts (ask context) or Motorhaube/Kofferraum |
-| Fahrertür, Beifahrertür | Fahrertür links, Beifahrertür rechts |
-| Motorhaube | Motorhaube |
-| Frontscheibe, Windschutzscheibe | Frontscheibe |
-| Dach | Dach |
-| Heck / hinten | hinten links, hinten rechts, Heckscheibe, Kofferraum |
+| Spoken variants | Enum value |
+|-----------------|------------|
+| Motorhaube, Haube, Motorabdeckung | Motorhaube |
+| Dach, Autodach, Fahrzeugdach | Dach |
+| Kofferraum, Heckklappe, Kofferraumdeckel | Kofferraum/Heckklappe |
+| Kühlergrill, Grill, Frontgrill | Kühlergrill |
+| linke Seite, Fahrzeugseite links, links die ganze Seite | Linke Fahrzeugseite |
+| rechte Seite, Fahrzeugseite rechts, rechts die ganze Seite | Rechte Fahrzeugseite |
+| Stoßstange vorne, Frontstoßstange, vordere Stoßstange | Vorderer Stoßfänger |
+| Stoßstange hinten, Heckstoßstange, hintere Stoßstange | Hinterer Stoßfänger |
+| Fahrertür, Tür vorne links | Fahrertür (vorne links) |
+| Beifahrertür, Tür vorne rechts | Beifahrertür (vorne rechts) |
+| hintere Tür links, Tür hinten links | Hintere linke Tür |
+| hintere Tür rechts, Tür hinten rechts | Hintere rechte Tür |
+| Vorderrad links, Rad vorne links, Reifen vorne links | Vorderrad links |
+| Vorderrad rechts, Rad vorne rechts, Reifen vorne rechts | Vorderrad rechts |
+| Hinterrad links, Rad hinten links, Reifen hinten links | Hinterrad links |
+| Hinterrad rechts, Rad hinten rechts, Reifen hinten rechts | Hinterrad rechts |
+| Windschutzscheibe, Frontscheibe | Windschutzscheibe |
+| Heckscheibe, hintere Scheibe, Rückscheibe | Heckscheibe |
+| Seitenscheibe vorne links, Fenster vorne links | Seitenscheibe (vorne links) |
+| Seitenscheibe vorne rechts, Fenster vorne rechts | Seitenscheibe (vorne rechts) |
+| Seitenscheibe hinten links, Fenster hinten links | Seitenscheibe (hinten links) |
+| Seitenscheibe hinten rechts, Fenster hinten rechts | Seitenscheibe (hinten rechts) |
+| Spiegel links, Außenspiegel links, linker Spiegel | Linker Außenspiegel |
+| Spiegel rechts, Außenspiegel rechts, rechter Spiegel | Rechter Außenspiegel |
+| Scheinwerfer vorne links, Frontscheinwerfer links | Frontscheinwerfer links |
+| Scheinwerfer vorne rechts, Frontscheinwerfer rechts | Frontscheinwerfer rechts |
+| Rücklicht links, Heckscheinwerfer links, Rückleuchte links | Heckscheinwerfer links |
+| Rücklicht rechts, Heckscheinwerfer rechts, Rückleuchte rechts | Heckscheinwerfer rechts |
+| Griffschale vorne links, Türgriff vorne links | Griffschalen (vorne links) |
+| Griffschale vorne rechts, Türgriff vorne rechts | Griffschalen (vorne rechts) |
+| Griffschale hinten links, Türgriff hinten links | Griffschalen (hinten links) |
+| Griffschale hinten rechts, Türgriff hinten rechts | Griffschalen (hinten rechts) |
+| Schweller links, Seitenschweller links | Schweller links |
+| Schweller rechts, Seitenschweller rechts | Schweller rechts |
+| Kotflügel links, linker Kotflügel | Kotflügel links |
+| Kotflügel rechts, rechter Kotflügel | Kotflügel rechts |
+| hinten rechts (vague) | pick from: Hinterer Stoßfänger, Hintere rechte Tür, Hinterrad rechts, Heckscheinwerfer rechts, Kotflügel rechts — choose the most likely based on context |
+| vorne links (vague) | pick from: Vorderer Stoßfänger, Fahrertür (vorne links), Vorderrad links, Frontscheinwerfer links, Kotflügel links — choose the most likely based on context |
 
 ## Tri-state speech (only on tri-state fields)
 

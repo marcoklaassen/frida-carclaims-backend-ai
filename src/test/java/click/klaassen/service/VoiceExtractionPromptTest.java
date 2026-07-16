@@ -50,7 +50,7 @@ class VoiceExtractionPromptTest {
         String section = schemaKnowledge.getSchemaPromptSection("driver-a");
 
         assertTrue(section.contains("damageType |"));
-        assertTrue(section.contains("enum: Auffahren, Rangieren/Parken"));
+        assertTrue(section.contains("enum: Auffahren, Rangieren/ Parken"));
     }
 
     @Test
