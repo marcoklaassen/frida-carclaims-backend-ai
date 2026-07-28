@@ -66,7 +66,9 @@ public class DemoCustomerDatabase {
                         str(entry, "carBrand"),
                         str(entry, "carModel"),
                         str(entry, "insuranceCompany"),
-                        str(entry, "insuranceNumber"));
+                        str(entry, "insuranceNumber"),
+                        str(entry, "chassisNumber"),
+                        bool(entry, "allRiskInsurance"));
                 result.put(normalizePlate(customer.licensePlate()), customer);
             }
             return Map.copyOf(result);
@@ -78,5 +80,10 @@ public class DemoCustomerDatabase {
     private static String str(Map<String, Object> map, String key) {
         Object val = map.get(key);
         return val == null ? null : String.valueOf(val);
+    }
+
+    private static boolean bool(Map<String, Object> map, String key) {
+        Object val = map.get(key);
+        return val instanceof Boolean b ? b : Boolean.parseBoolean(String.valueOf(val));
     }
 }

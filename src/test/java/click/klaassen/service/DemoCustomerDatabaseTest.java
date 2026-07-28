@@ -21,6 +21,8 @@ class DemoCustomerDatabaseTest {
         assertEquals("Mustermann", result.get().surName());
         assertEquals("BMW", result.get().carBrand());
         assertEquals("Allianz", result.get().insuranceCompany());
+        assertEquals("WBA8E1C50JA123456", result.get().chassisNumber());
+        assertTrue(result.get().allRiskInsurance());
     }
 
     @Test

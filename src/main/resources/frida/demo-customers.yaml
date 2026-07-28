@@ -13,6 +13,8 @@ customers:
     carModel: "320i"
     insuranceCompany: "Allianz"
     insuranceNumber: "VN-2024-001"
+    chassisNumber: "WBA8E1C50JA123456"
+    allRiskInsurance: true
   - licensePlate: "M-CD 5678"
     salutation: "Frau"
     name: "Anna"
@@ -27,6 +29,8 @@ customers:
     carModel: "Golf"
     insuranceCompany: "HUK-COBURG"
     insuranceNumber: "VN-2024-002"
+    chassisNumber: "WVWZZZ3CZWE456789"
+    allRiskInsurance: false
   - licensePlate: "B-EF 9012"
     salutation: "Herr"
     name: "Thomas"
@@ -41,6 +45,8 @@ customers:
     carModel: "C-Klasse"
     insuranceCompany: "ERGO"
     insuranceNumber: "VN-2024-003"
+    chassisNumber: "WDD2050091F987654"
+    allRiskInsurance: true
   - licensePlate: "K-GH 3456"
     salutation: "Frau"
     name: "Lisa"
@@ -55,3 +61,5 @@ customers:
     carModel: "A4"
     insuranceCompany: "AXA"
     insuranceNumber: "VN-2024-004"
+    chassisNumber: "WAUZZZ8V9KA345678"
+    allRiskInsurance: true

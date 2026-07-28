@@ -14,5 +14,7 @@ public record DemoCustomer(
         String carBrand,
         String carModel,
         String insuranceCompany,
-        String insuranceNumber) {
+        String insuranceNumber,
+        String chassisNumber,
+        boolean allRiskInsurance) {
 }

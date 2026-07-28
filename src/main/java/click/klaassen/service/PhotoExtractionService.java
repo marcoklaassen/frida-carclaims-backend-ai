@@ -101,6 +101,8 @@ public class PhotoExtractionService {
                         .append(", versichert bei ").append(c.insuranceCompany())
                         .append(" (Versicherungsnummer: ").append(c.insuranceNumber()).append(")")
                         .append(", Fahrzeug: ").append(c.carBrand()).append(" ").append(c.carModel())
+                        .append(", Fahrgestellnummer: ").append(c.chassisNumber())
+                        .append(", Vollkaskoversicherung: ").append(c.allRiskInsurance() ? "ja" : "nein")
                         .append(".");
                 found = true;
                 LOG.info("License plate lookup hit: " + plate + " → " + c.surName());
