@@ -3,6 +3,7 @@ package click.klaassen.service;
 import click.klaassen.api.AssistantTurnResponse;
 import click.klaassen.claims.model.Claimsdata;
 import click.klaassen.claims.model.enums.Language;
+import click.klaassen.exception.UpstreamAiException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -92,16 +93,20 @@ public class AssistantTurnService {
     }
 
     private String transcribe(byte[] audioBytes, String mimeType) {
-        String base64 = Base64.getEncoder().encodeToString(audioBytes);
-        String mime = mimeType != null ? mimeType : "audio/webm";
-        Audio audio = Audio.builder()
-                .base64Data(base64)
-                .mimeType(mime)
-                .build();
-        AudioTranscriptionRequest request = AudioTranscriptionRequest.builder(audio)
-                .language(Language.DE.getIsoCode())
-                .build();
-        return transcriptionModel.transcribe(request).text();
+        try {
+            String base64 = Base64.getEncoder().encodeToString(audioBytes);
+            String mime = mimeType != null ? mimeType : "audio/webm";
+            Audio audio = Audio.builder()
+                    .base64Data(base64)
+                    .mimeType(mime)
+                    .build();
+            AudioTranscriptionRequest request = AudioTranscriptionRequest.builder(audio)
+                    .language(Language.DE.getIsoCode())
+                    .build();
+            return transcriptionModel.transcribe(request).text();
+        } catch (Exception e) {
+            throw new UpstreamAiException("Audio transcription failed", e);
+        }
     }
 
     private Claimsdata parseCurrentState(String json) {
