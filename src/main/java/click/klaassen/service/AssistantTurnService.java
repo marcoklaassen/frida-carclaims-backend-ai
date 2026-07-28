@@ -20,6 +20,17 @@ public class AssistantTurnService {
 
     private static final Logger LOG = Logger.getLogger(AssistantTurnService.class.getName());
 
+    private static final java.util.Map<String, String> STEP_KEY_TO_ROUTE = java.util.Map.of(
+        "carclaimsDetails", "/accidentinfo",
+        "insurance-holder-a", "/personalinfo/a",
+        "driver-a", "/driverinfo/a",
+        "insurance-holder-b", "/personalinfo/b",
+        "driver-b", "/driverinfo/b",
+        "injuredDetails", "/injuredpersons",
+        "miscellaneousDamages", "/miscellaneousdamages",
+        "witness", "/witnesses"
+    );
+
     @Inject
     AudioTranscriptionModel transcriptionModel;
 
@@ -72,10 +83,13 @@ public class AssistantTurnService {
                 + " chars, nextStep=" + questionResponse.stepKey()
                 + ", done=" + questionResponse.done());
 
+        String navigateTo = STEP_KEY_TO_ROUTE.getOrDefault(
+                questionResponse.stepKey(), questionResponse.navigateTo());
+
         return new AssistantTurnResponse(
                 questionResponse.question(),
                 questionResponse.stepKey(),
-                questionResponse.navigateTo(),
+                navigateTo,
                 audioUrl,
                 currentState,
                 transcript,
