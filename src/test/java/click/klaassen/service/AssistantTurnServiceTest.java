@@ -48,13 +48,13 @@ class AssistantTurnServiceTest {
         data.setCarBrand("BMW");
         data.setCarModel("3er");
         data.setLicensePlate("B-AB 123");
-        data.setVatDeduction(TriState.YES);
-        data.setAllRiskInsurance(TriState.NO);
+        data.setVatDeduction(TriState.TRUE);
+        data.setAllRiskInsurance(TriState.FALSE);
         data.setDriverSalutation("Herr");
         data.setDriverName("Max");
         data.setDriverDamagedParts(List.of("Motorhaube", "Kuehlergrill"));
         data.setDamageDescription("Frontalschaden");
-        data.setVehicleOperational(TriState.YES);
+        data.setVehicleOperational(TriState.TRUE);
 
         // Swap
         Claimsdata result = service.swapPartyFields(data);
@@ -66,13 +66,13 @@ class AssistantTurnServiceTest {
         assertEquals("BMW", result.getOtherCarBrand());
         assertEquals("3er", result.getOtherCarModel());
         assertEquals("B-AB 123", result.getOtherLicensePlate());
-        assertEquals(TriState.YES, result.getOtherVatDeduction());
-        assertEquals(TriState.NO, result.getOtherAllRiskInsurance());
+        assertEquals(TriState.TRUE, result.getOtherVatDeduction());
+        assertEquals(TriState.FALSE, result.getOtherAllRiskInsurance());
         assertEquals("Herr", result.getOtherDriverSalutation());
         assertEquals("Max", result.getOtherDriverName());
         assertEquals(List.of("Motorhaube", "Kuehlergrill"), result.getOtherDriverDamagedParts());
         assertEquals("Frontalschaden", result.getOtherDamageDescription());
-        assertEquals(TriState.YES, result.getOtherVehicleOperational());
+        assertEquals(TriState.TRUE, result.getOtherVehicleOperational());
 
         // Verify A fields are now null/empty
         assertNull(result.getInsuranceHolderSalutation());

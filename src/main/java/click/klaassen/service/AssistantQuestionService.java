@@ -71,7 +71,7 @@ public class AssistantQuestionService {
         if (json == null || json.isBlank()) {
             return new AssistantQuestionResponse(
                     "Entschuldigung, ich konnte keine Frage generieren. Können wir es nochmal versuchen?",
-                    null, null, List.of(), false, false, null);
+                    null, null, List.of(), false, false, null, null);
         }
         try {
             String cleaned = ClaimsJsonParser.extractJson(json);
@@ -82,7 +82,7 @@ public class AssistantQuestionService {
             LOG.warning("Failed to parse question response: " + e.getMessage());
             return new AssistantQuestionResponse(
                     "Entschuldigung, ich konnte keine Frage generieren. Können wir es nochmal versuchen?",
-                    null, null, List.of(), false, false, null);
+                    null, null, List.of(), false, false, null, null);
         }
     }
 
