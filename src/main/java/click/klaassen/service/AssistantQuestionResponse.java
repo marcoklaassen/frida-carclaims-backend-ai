@@ -12,5 +12,7 @@ public record AssistantQuestionResponse(
         boolean done,
         boolean recommendPhoto,
         String photoReason,
-        String reassignParty) {
+        String reassignParty,
+        boolean driverSameAsHolder,
+        boolean otherDriverSameAsHolder) {
 }

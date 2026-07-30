@@ -82,6 +82,13 @@ public class AssistantTurnService {
             currentState = swapPartyFields(currentState);
         }
 
+        if (questionResponse.driverSameAsHolder()) {
+            copyHolderToDriver(currentState);
+        }
+        if (questionResponse.otherDriverSameAsHolder()) {
+            copyOtherHolderToOtherDriver(currentState);
+        }
+
         String audioUrl = null;
         if (questionResponse.question() != null && !questionResponse.question().isBlank()) {
             byte[] ttsAudio = ttsService.generateSpeech(questionResponse.question());
@@ -159,6 +166,20 @@ public class AssistantTurnService {
             LOG.warning("Could not serialize state: " + e.getMessage());
             return "{}";
         }
+    }
+
+    private void copyHolderToDriver(Claimsdata data) {
+        if (data == null) return;
+        data.setDriverSalutation(data.getInsuranceHolderSalutation());
+        data.setDriverName(data.getInsuranceHolderName());
+        data.setDriverSurName(data.getInsuranceHolderSurName());
+    }
+
+    private void copyOtherHolderToOtherDriver(Claimsdata data) {
+        if (data == null) return;
+        data.setOtherDriverSalutation(data.getOtherInsuranceHolderSalutation());
+        data.setOtherDriverName(data.getOtherInsuranceHolderName());
+        data.setOtherDriverSurName(data.getOtherInsuranceHolderSurName());
     }
 
     Claimsdata swapPartyFields(Claimsdata data) {
