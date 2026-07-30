@@ -33,8 +33,9 @@ public class AssistantQuestionService {
     private volatile String systemPrompt;
 
     public AssistantQuestionResponse generateNextQuestion(
-            String currentStateJson, String conversationHistoryJson) {
-        String userPrompt = buildUserPrompt(currentStateJson, conversationHistoryJson);
+            String currentStateJson, String conversationHistoryJson,
+            String previousStepKey) {
+        String userPrompt = buildUserPrompt(currentStateJson, conversationHistoryJson, previousStepKey);
 
         try {
             ChatResponse response = chatModel.chat(ChatRequest.builder()
@@ -55,15 +56,21 @@ public class AssistantQuestionService {
         }
     }
 
-    private String buildUserPrompt(String currentStateJson, String conversationHistoryJson) {
+    private String buildUserPrompt(String currentStateJson, String conversationHistoryJson,
+                                    String previousStepKey) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Current form state (fields already filled):\n");
+        sb.append("Current form state (fields already filled — any field with a value here must NOT be asked about):\n");
         sb.append(currentStateJson != null ? currentStateJson : "{}");
         sb.append("\n\nConversation history so far:\n");
         sb.append(conversationHistoryJson != null ? conversationHistoryJson : "[]");
-        sb.append("\n\nDetermine which fields are still missing. ");
-        sb.append("Generate the next question following the step order. ");
-        sb.append("Skip steps where all fields are already filled.");
+        if (previousStepKey != null && !previousStepKey.isBlank()) {
+            sb.append("\n\nLast completed step: ").append(previousStepKey);
+            sb.append("\nContinue FORWARD from here. Do NOT return to earlier steps.");
+        }
+        sb.append("\n\nIMPORTANT: Check EVERY field in the current form state above. ");
+        sb.append("If a field already has a value, it is filled — do NOT ask about it. ");
+        sb.append("Only ask about fields that are null, empty, or missing from the state. ");
+        sb.append("Generate the next question for the NEXT unfilled step in order.");
         return sb.toString();
     }
 

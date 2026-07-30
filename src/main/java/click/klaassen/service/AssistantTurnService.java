@@ -76,7 +76,7 @@ public class AssistantTurnService {
 
         String updatedStateJson = serializeState(currentState);
         AssistantQuestionResponse questionResponse =
-                questionService.generateNextQuestion(updatedStateJson, conversationHistoryJson);
+                questionService.generateNextQuestion(updatedStateJson, conversationHistoryJson, previousStepKey);
 
         if ("b".equals(questionResponse.reassignParty())) {
             currentState = swapPartyFields(currentState);
