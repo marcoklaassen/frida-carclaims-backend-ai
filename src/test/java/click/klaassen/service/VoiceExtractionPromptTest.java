@@ -20,7 +20,7 @@ class VoiceExtractionPromptTest {
 
     @Test
     void extractionRulesRequireEmptyJsonForNoiseTranscripts() {
-        String prompt = claimsFieldExtractor.systemPromptForStep("carclaimsDetails");
+        String prompt = claimsFieldExtractor.systemPromptForStep("accident-info");
 
         assertTrue(prompt.contains("return {}"));
         assertTrue(prompt.contains("[Music]"));
@@ -46,9 +46,9 @@ class VoiceExtractionPromptTest {
     @Test
     void stepPromptFocusesOnStepFields() {
         String full = claimsFieldExtractor.systemPromptForStep(null);
-        String accident = claimsFieldExtractor.systemPromptForStep("carclaimsDetails");
+        String accident = claimsFieldExtractor.systemPromptForStep("accident-location");
 
-        assertTrue(accident.contains("Step-specific hints (carclaimsDetails)"));
+        assertTrue(accident.contains("Step-specific hints (accident-location)"));
         assertTrue(accident.contains("German field synonyms"));
         assertFalse(full.contains("German field synonyms"));
         assertTrue(accident.contains("accidentCity | Ort"));
@@ -57,7 +57,7 @@ class VoiceExtractionPromptTest {
 
     @Test
     void driverStepIncludesDamageCauseEnum() {
-        String section = schemaKnowledge.getSchemaPromptSection("driver-a");
+        String section = schemaKnowledge.getSchemaPromptSection("damage-description-a");
 
         assertTrue(section.contains("Priority fields for this step"));
         assertTrue(section.contains("damageType |"));
@@ -81,7 +81,7 @@ class VoiceExtractionPromptTest {
 
     @Test
     void witnessStepIncludesWitnessArrayPaths() {
-        String section = schemaKnowledge.getSchemaPromptSection("witness");
+        String section = schemaKnowledge.getSchemaPromptSection("witnesses");
 
         assertTrue(section.contains("hasWitnesses"));
         assertTrue(section.contains("witnessesCount"));

@@ -46,7 +46,7 @@ class ClaimsSchemaKnowledgeTest {
 
     @Test
     void stepPromptIncludesSynonymsAndExamples() {
-        String section = schemaKnowledge.getSchemaPromptSection("carclaimsDetails");
+        String section = schemaKnowledge.getSchemaPromptSection("accident-info");
 
         assertTrue(section.contains("German field synonyms"));
         assertTrue(section.contains("Few-shot extraction examples"));
@@ -59,20 +59,20 @@ class ClaimsSchemaKnowledgeTest {
 
     @Test
     void stepScopedCatalogFiltersToAccidentFieldsOnly() {
-        List<String> catalogLines = schemaKnowledge.filteredCatalogLinesForStep("carclaimsDetails");
+        List<String> catalogLines = schemaKnowledge.filteredCatalogLinesForStep("accident-location");
         String catalog = String.join("\n", catalogLines);
-        String section = schemaKnowledge.getSchemaPromptSection("carclaimsDetails");
+        String section = schemaKnowledge.getSchemaPromptSection("accident-location");
 
         assertTrue(catalog.contains("accidentCity | Ort"));
-        assertTrue(section.contains("Step-specific hints (carclaimsDetails)"));
+        assertTrue(section.contains("Step-specific hints (accident-location)"));
         assertFalse(catalog.contains("licensePlate |"));
     }
 
     @Test
     void stepScopedCatalogFiltersPolicyholderFields() {
-        List<String> catalogLines = schemaKnowledge.filteredCatalogLinesForStep("insurance-holder-a");
+        List<String> catalogLines = schemaKnowledge.filteredCatalogLinesForStep("vehicle-info-a");
         String catalog = String.join("\n", catalogLines);
-        String section = schemaKnowledge.getSchemaPromptSection("insurance-holder-a");
+        String section = schemaKnowledge.getSchemaPromptSection("vehicle-info-a");
 
         assertTrue(catalog.contains("licensePlate |"));
         assertFalse(catalog.contains("accidentCity | Ort"));
@@ -82,8 +82,8 @@ class ClaimsSchemaKnowledgeTest {
 
     @Test
     void stepScopedPromptStaysWithinSizeLimit() {
-        assertTrue(schemaKnowledge.getSchemaPromptSection("carclaimsDetails").length() < MAX_PROMPT_CHARS);
-        assertTrue(schemaKnowledge.getSchemaPromptSection("driver-a").length() < MAX_PROMPT_CHARS);
+        assertTrue(schemaKnowledge.getSchemaPromptSection("accident-info").length() < MAX_PROMPT_CHARS);
+        assertTrue(schemaKnowledge.getSchemaPromptSection("driver-info-a").length() < MAX_PROMPT_CHARS);
     }
 
     @Test
@@ -99,7 +99,7 @@ class ClaimsSchemaKnowledgeTest {
 
     @Test
     void stepPromptContainsPriorityAndOtherFieldsSections() {
-        String section = schemaKnowledge.getSchemaPromptSection("driver-a");
+        String section = schemaKnowledge.getSchemaPromptSection("driver-info-a");
 
         assertTrue(section.contains("Priority fields for this step"));
         assertTrue(section.contains("Other available fields"));
@@ -107,7 +107,7 @@ class ClaimsSchemaKnowledgeTest {
 
     @Test
     void stepPromptOtherFieldsIncludesNonStepFields() {
-        String section = schemaKnowledge.getSchemaPromptSection("driver-a");
+        String section = schemaKnowledge.getSchemaPromptSection("driver-info-a");
 
         assertTrue(section.contains("accidentCity"));
         assertTrue(section.contains("licensePlate"));
@@ -115,13 +115,13 @@ class ClaimsSchemaKnowledgeTest {
 
     @Test
     void stepPromptPriorityFieldsContainStepFields() {
-        String section = schemaKnowledge.getSchemaPromptSection("driver-a");
+        String section = schemaKnowledge.getSchemaPromptSection("driver-info-a");
         String prioritySection = section.substring(
                 section.indexOf("Priority fields"),
                 section.indexOf("Other available fields"));
 
-        assertTrue(prioritySection.contains("damageType |"));
-        assertTrue(prioritySection.contains("driverDamagedParts |"));
+        assertTrue(prioritySection.contains("driver"));
+        assertFalse(prioritySection.contains("damageType |"));
         assertFalse(prioritySection.contains("accidentCity |"));
     }
 }

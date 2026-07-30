@@ -18,11 +18,21 @@ class AssistantQuestionServiceTest {
     void promptContainsStepOrder() throws Exception {
         var stream = getClass().getResourceAsStream("/frida/assistant-question-prompt.md");
         String content = new String(stream.readAllBytes());
-        assertTrue(content.contains("carclaimsDetails"));
-        assertTrue(content.contains("insurance-holder-a"));
-        assertTrue(content.contains("driver-a"));
-        assertTrue(content.contains("insurance-holder-b"));
-        assertTrue(content.contains("witness"));
+        assertTrue(content.contains("accident-info"));
+        assertTrue(content.contains("accident-location"));
+        assertTrue(content.contains("personal-info-a"));
+        assertTrue(content.contains("vehicle-info-a"));
+        assertTrue(content.contains("driver-info-a"));
+        assertTrue(content.contains("damage-location-a"));
+        assertTrue(content.contains("damage-description-a"));
+        assertTrue(content.contains("personal-info-b"));
+        assertTrue(content.contains("vehicle-info-b"));
+        assertTrue(content.contains("driver-info-b"));
+        assertTrue(content.contains("damage-location-b"));
+        assertTrue(content.contains("damage-description-b"));
+        assertTrue(content.contains("injured-persons"));
+        assertTrue(content.contains("miscellaneous-damages"));
+        assertTrue(content.contains("witnesses"));
     }
 
     @Test
