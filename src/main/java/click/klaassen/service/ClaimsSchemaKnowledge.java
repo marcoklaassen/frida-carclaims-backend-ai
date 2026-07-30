@@ -45,8 +45,8 @@ public class ClaimsSchemaKnowledge {
         stepConfigs = loadStepCatalog();
         fullCatalogLines = buildCatalogLines(loadSchemas());
         validatePromptSize(getSchemaPromptSection(null));
-        validatePromptSize(getSchemaPromptSection("carclaimsDetails"));
-        validatePromptSize(getSchemaPromptSection("driver-a"));
+        validatePromptSize(getSchemaPromptSection("accident-info"));
+        validatePromptSize(getSchemaPromptSection("driver-info-a"));
     }
 
     String getSchemaPromptSection() {

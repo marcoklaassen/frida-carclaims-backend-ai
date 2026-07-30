@@ -20,15 +20,22 @@ public class AssistantTurnService {
 
     private static final Logger LOG = Logger.getLogger(AssistantTurnService.class.getName());
 
-    private static final java.util.Map<String, String> STEP_KEY_TO_ROUTE = java.util.Map.of(
-        "carclaimsDetails", "/accidentinfo",
-        "insurance-holder-a", "/personalinfo/a",
-        "driver-a", "/driverinfo/a",
-        "insurance-holder-b", "/personalinfo/b",
-        "driver-b", "/driverinfo/b",
-        "injuredDetails", "/injuredpersons",
-        "miscellaneousDamages", "/miscellaneousdamages",
-        "witness", "/witnesses"
+    private static final java.util.Map<String, String> STEP_KEY_TO_ROUTE = java.util.Map.ofEntries(
+        java.util.Map.entry("accident-info", "/accidentinfo"),
+        java.util.Map.entry("accident-location", "/accidentlocation"),
+        java.util.Map.entry("personal-info-a", "/personalinfo/a"),
+        java.util.Map.entry("vehicle-info-a", "/vehicleinfo/a"),
+        java.util.Map.entry("driver-info-a", "/driverinfo/a"),
+        java.util.Map.entry("damage-location-a", "/damagelocation/a"),
+        java.util.Map.entry("damage-description-a", "/damagedescription/a"),
+        java.util.Map.entry("personal-info-b", "/personalinfo/b"),
+        java.util.Map.entry("vehicle-info-b", "/vehicleinfo/b"),
+        java.util.Map.entry("driver-info-b", "/driverinfo/b"),
+        java.util.Map.entry("damage-location-b", "/damagelocation/b"),
+        java.util.Map.entry("damage-description-b", "/damagedescription/b"),
+        java.util.Map.entry("injured-persons", "/injuredpersons"),
+        java.util.Map.entry("miscellaneous-damages", "/miscellaneousdamages"),
+        java.util.Map.entry("witnesses", "/witnesses")
     );
 
     @Inject
