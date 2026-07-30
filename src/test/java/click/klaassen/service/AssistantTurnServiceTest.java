@@ -2,7 +2,11 @@ package click.klaassen.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import click.klaassen.claims.model.Claimsdata;
+import click.klaassen.claims.model.enums.TriState;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class AssistantTurnServiceTest {
@@ -30,5 +34,59 @@ class AssistantTurnServiceTest {
         String result = AssistantTurnService.enrichTranscriptWithContext(
                 "Hallo", "  ");
         assertEquals("Hallo", result);
+    }
+
+    @Test
+    void swapPartyFields_swapsAtoB() {
+        AssistantTurnService service = new AssistantTurnService();
+        Claimsdata data = new Claimsdata();
+
+        // Set party A fields
+        data.setInsuranceHolderSalutation("Herr");
+        data.setInsuranceHolderName("Max");
+        data.setInsuranceHolderSurName("Mustermann");
+        data.setCarBrand("BMW");
+        data.setCarModel("3er");
+        data.setLicensePlate("B-AB 123");
+        data.setVatDeduction(TriState.YES);
+        data.setAllRiskInsurance(TriState.NO);
+        data.setDriverSalutation("Herr");
+        data.setDriverName("Max");
+        data.setDriverDamagedParts(List.of("Motorhaube", "Kuehlergrill"));
+        data.setDamageDescription("Frontalschaden");
+        data.setVehicleOperational(TriState.YES);
+
+        // Swap
+        Claimsdata result = service.swapPartyFields(data);
+
+        // Verify A fields are now in B
+        assertEquals("Herr", result.getOtherInsuranceHolderSalutation());
+        assertEquals("Max", result.getOtherInsuranceHolderName());
+        assertEquals("Mustermann", result.getOtherInsuranceHolderSurName());
+        assertEquals("BMW", result.getOtherCarBrand());
+        assertEquals("3er", result.getOtherCarModel());
+        assertEquals("B-AB 123", result.getOtherLicensePlate());
+        assertEquals(TriState.YES, result.getOtherVatDeduction());
+        assertEquals(TriState.NO, result.getOtherAllRiskInsurance());
+        assertEquals("Herr", result.getOtherDriverSalutation());
+        assertEquals("Max", result.getOtherDriverName());
+        assertEquals(List.of("Motorhaube", "Kuehlergrill"), result.getOtherDriverDamagedParts());
+        assertEquals("Frontalschaden", result.getOtherDamageDescription());
+        assertEquals(TriState.YES, result.getOtherVehicleOperational());
+
+        // Verify A fields are now null/empty
+        assertNull(result.getInsuranceHolderSalutation());
+        assertNull(result.getInsuranceHolderName());
+        assertNull(result.getInsuranceHolderSurName());
+        assertNull(result.getCarBrand());
+        assertNull(result.getCarModel());
+        assertNull(result.getLicensePlate());
+        assertNull(result.getVatDeduction());
+        assertNull(result.getAllRiskInsurance());
+        assertNull(result.getDriverSalutation());
+        assertNull(result.getDriverName());
+        assertNull(result.getDriverDamagedParts());
+        assertNull(result.getDamageDescription());
+        assertNull(result.getVehicleOperational());
     }
 }

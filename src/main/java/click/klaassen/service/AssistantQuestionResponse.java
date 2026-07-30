@@ -11,5 +11,6 @@ public record AssistantQuestionResponse(
         List<String> targetFields,
         boolean done,
         boolean recommendPhoto,
-        String photoReason) {
+        String photoReason,
+        String reassignParty) {
 }

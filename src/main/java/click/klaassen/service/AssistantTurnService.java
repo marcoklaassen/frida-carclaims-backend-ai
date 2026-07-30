@@ -78,6 +78,10 @@ public class AssistantTurnService {
         AssistantQuestionResponse questionResponse =
                 questionService.generateNextQuestion(updatedStateJson, conversationHistoryJson);
 
+        if ("b".equals(questionResponse.reassignParty())) {
+            currentState = swapPartyFields(currentState);
+        }
+
         String audioUrl = null;
         if (questionResponse.question() != null && !questionResponse.question().isBlank()) {
             byte[] ttsAudio = ttsService.generateSpeech(questionResponse.question());
@@ -155,5 +159,168 @@ public class AssistantTurnService {
             LOG.warning("Could not serialize state: " + e.getMessage());
             return "{}";
         }
+    }
+
+    Claimsdata swapPartyFields(Claimsdata data) {
+        if (data == null) {
+            return null;
+        }
+
+        // Insurance holder fields (String)
+        String tempSalutation = data.getInsuranceHolderSalutation();
+        data.setInsuranceHolderSalutation(data.getOtherInsuranceHolderSalutation());
+        data.setOtherInsuranceHolderSalutation(tempSalutation);
+
+        String tempTitle = data.getInsuranceHolderTitle();
+        data.setInsuranceHolderTitle(data.getOtherInsuranceHolderTitle());
+        data.setOtherInsuranceHolderTitle(tempTitle);
+
+        String tempName = data.getInsuranceHolderName();
+        data.setInsuranceHolderName(data.getOtherInsuranceHolderName());
+        data.setOtherInsuranceHolderName(tempName);
+
+        String tempSurName = data.getInsuranceHolderSurName();
+        data.setInsuranceHolderSurName(data.getOtherInsuranceHolderSurName());
+        data.setOtherInsuranceHolderSurName(tempSurName);
+
+        String tempStreetName = data.getInsuranceHolderStreetName();
+        data.setInsuranceHolderStreetName(data.getOtherInsuranceHolderStreetName());
+        data.setOtherInsuranceHolderStreetName(tempStreetName);
+
+        String tempHouseNumber = data.getInsuranceHolderHouseNumber();
+        data.setInsuranceHolderHouseNumber(data.getOtherInsuranceHolderHouseNumber());
+        data.setOtherInsuranceHolderHouseNumber(tempHouseNumber);
+
+        String tempPostalCode = data.getInsuranceHolderPostalCode();
+        data.setInsuranceHolderPostalCode(data.getOtherInsuranceHolderPostalCode());
+        data.setOtherInsuranceHolderPostalCode(tempPostalCode);
+
+        String tempCity = data.getInsuranceHolderCity();
+        data.setInsuranceHolderCity(data.getOtherInsuranceHolderCity());
+        data.setOtherInsuranceHolderCity(tempCity);
+
+        String tempTelephone = data.getInsuranceHolderTelephone();
+        data.setInsuranceHolderTelephone(data.getOtherInsuranceHolderTelephone());
+        data.setOtherInsuranceHolderTelephone(tempTelephone);
+
+        String tempEmail = data.getInsuranceHolderEmail();
+        data.setInsuranceHolderEmail(data.getOtherInsuranceHolderEmail());
+        data.setOtherInsuranceHolderEmail(tempEmail);
+
+        // Vehicle/insurance fields (String)
+        String tempCarBrand = data.getCarBrand();
+        data.setCarBrand(data.getOtherCarBrand());
+        data.setOtherCarBrand(tempCarBrand);
+
+        String tempCarModel = data.getCarModel();
+        data.setCarModel(data.getOtherCarModel());
+        data.setOtherCarModel(tempCarModel);
+
+        String tempLicensePlate = data.getLicensePlate();
+        data.setLicensePlate(data.getOtherLicensePlate());
+        data.setOtherLicensePlate(tempLicensePlate);
+
+        String tempInsuranceCompany = data.getInsuranceCompany();
+        data.setInsuranceCompany(data.getOtherInsuranceCompany());
+        data.setOtherInsuranceCompany(tempInsuranceCompany);
+
+        String tempInsuranceNumber = data.getInsuranceNumber();
+        data.setInsuranceNumber(data.getOtherInsuranceNumber());
+        data.setOtherInsuranceNumber(tempInsuranceNumber);
+
+        String tempChassisNumber = data.getChassisNumber();
+        data.setChassisNumber(data.getOtherChassisNumber());
+        data.setOtherChassisNumber(tempChassisNumber);
+
+        String tempOdometerReading = data.getOdometerReading();
+        data.setOdometerReading(data.getOtherOdometerReading());
+        data.setOtherOdometerReading(tempOdometerReading);
+
+        String tempGreenCardNumber = data.getGreenCardNumber();
+        data.setGreenCardNumber(data.getOtherGreenCardNumber());
+        data.setOtherGreenCardNumber(tempGreenCardNumber);
+
+        String tempValidDateGreenCard = data.getValidDateGreenCard();
+        data.setValidDateGreenCard(data.getOtherValidDateGreenCard());
+        data.setOtherValidDateGreenCard(tempValidDateGreenCard);
+
+        // Vehicle/insurance fields (TriState)
+        click.klaassen.claims.model.enums.TriState tempVatDeduction = data.getVatDeduction();
+        data.setVatDeduction(data.getOtherVatDeduction());
+        data.setOtherVatDeduction(tempVatDeduction);
+
+        click.klaassen.claims.model.enums.TriState tempAllRiskInsurance = data.getAllRiskInsurance();
+        data.setAllRiskInsurance(data.getOtherAllRiskInsurance());
+        data.setOtherAllRiskInsurance(tempAllRiskInsurance);
+
+        // Driver fields (String)
+        String tempDriverSalutation = data.getDriverSalutation();
+        data.setDriverSalutation(data.getOtherDriverSalutation());
+        data.setOtherDriverSalutation(tempDriverSalutation);
+
+        String tempDriverName = data.getDriverName();
+        data.setDriverName(data.getOtherDriverName());
+        data.setOtherDriverName(tempDriverName);
+
+        String tempDriverSurName = data.getDriverSurName();
+        data.setDriverSurName(data.getOtherDriverSurName());
+        data.setOtherDriverSurName(tempDriverSurName);
+
+        String tempDriverStreetName = data.getDriverStreetName();
+        data.setDriverStreetName(data.getOtherDriverStreetName());
+        data.setOtherDriverStreetName(tempDriverStreetName);
+
+        String tempDriverHouseNumber = data.getDriverHouseNumber();
+        data.setDriverHouseNumber(data.getOtherDriverHouseNumber());
+        data.setOtherDriverHouseNumber(tempDriverHouseNumber);
+
+        String tempDriverPostalCode = data.getDriverPostalCode();
+        data.setDriverPostalCode(data.getOtherDriverPostalCode());
+        data.setOtherDriverPostalCode(tempDriverPostalCode);
+
+        String tempDriverCity = data.getDriverCity();
+        data.setDriverCity(data.getOtherDriverCity());
+        data.setOtherDriverCity(tempDriverCity);
+
+        String tempDriverTelephone = data.getDriverTelephone();
+        data.setDriverTelephone(data.getOtherDriverTelephone());
+        data.setOtherDriverTelephone(tempDriverTelephone);
+
+        String tempDriverEmail = data.getDriverEmail();
+        data.setDriverEmail(data.getOtherDriverEmail());
+        data.setOtherDriverEmail(tempDriverEmail);
+
+        String tempDriverLicense = data.getDriverDriverLicense();
+        data.setDriverDriverLicense(data.getOtherDriverDriverLicense());
+        data.setOtherDriverDriverLicense(tempDriverLicense);
+
+        String tempLicenseIssuingAuthority = data.getDriverLicenseIssuingAuthority();
+        data.setDriverLicenseIssuingAuthority(data.getOtherDriverLicenseIssuingAuthority());
+        data.setOtherDriverLicenseIssuingAuthority(tempLicenseIssuingAuthority);
+
+        // Driver fields (List<String>)
+        java.util.List<String> tempDamagedParts = data.getDriverDamagedParts();
+        data.setDriverDamagedParts(data.getOtherDriverDamagedParts());
+        data.setOtherDriverDamagedParts(tempDamagedParts);
+
+        // Damage fields (String)
+        String tempDamageDescription = data.getDamageDescription();
+        data.setDamageDescription(data.getOtherDamageDescription());
+        data.setOtherDamageDescription(tempDamageDescription);
+
+        String tempAdditionalComments = data.getAdditionalComments();
+        data.setAdditionalComments(data.getOtherAdditionalComments());
+        data.setOtherAdditionalComments(tempAdditionalComments);
+
+        String tempDamageType = data.getDamageType();
+        data.setDamageType(data.getOtherDamageType());
+        data.setOtherDamageType(tempDamageType);
+
+        // Damage fields (TriState)
+        click.klaassen.claims.model.enums.TriState tempVehicleOperational = data.getVehicleOperational();
+        data.setVehicleOperational(data.getOtherVehicleOperational());
+        data.setOtherVehicleOperational(tempVehicleOperational);
+
+        return data;
     }
 }
