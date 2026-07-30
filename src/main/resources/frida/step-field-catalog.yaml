@@ -1,23 +1,43 @@
 # Maps frontend stepKey (sessionStorage) to allowed flat field names for voice extraction.
 # All fields are now flat (no nested paths). Prefixes match the start of field names.
 steps:
-  carclaimsDetails:
+  accident-info:
     hints: |
-      - The user is on the accident details tab.
-      - "Ort", "Straße", "PLZ" on this page mean accidentCity, accidentStreetName, accidentPostalCode.
+      - The user is on the accident info tab (/accidentinfo).
       - Map spoken German dates to YYYY-MM-DD and times to HH:mm:ss.
+      - accidentReportNumber is also on this page.
     allowedPathPrefixes:
       - language
-      - accident
+      - accidentDate
+      - accidentTime
+      - accidentReportNumber
 
-  insurance-holder-a:
+  accident-location:
     hints: |
-      - The user is on THEIR OWN personal info and vehicle tab (Versicherungsnehmer A).
+      - The user is on the accident location tab (/accidentlocation).
+      - "Ort", "Straße", "PLZ" on this page mean accidentCity, accidentStreetName, accidentPostalCode.
+      - accidentDetails field is on THIS page, not on /accidentinfo.
+    allowedPathPrefixes:
+      - accidentStreetName
+      - accidentHouseNumber
+      - accidentPostalCode
+      - accidentCity
+      - accidentDetails
+
+  personal-info-a:
+    hints: |
+      - The user is on THEIR OWN personal info tab (Versicherungsnehmer A).
       - ALL spoken personal data (name, address, phone, email) goes to insuranceHolder* fields.
-      - ALL spoken vehicle/insurance data goes to carBrand, carModel, licensePlate, insuranceCompany, insuranceNumber, etc.
-      - Do NOT use otherInsuranceHolder* or otherDriver* fields here.
+      - Do NOT use otherInsuranceHolder* fields here.
     allowedPathPrefixes:
       - insuranceHolder
+
+  vehicle-info-a:
+    hints: |
+      - The user is on THEIR OWN vehicle info tab.
+      - ALL spoken vehicle/insurance data goes to carBrand, carModel, licensePlate, insuranceCompany, insuranceNumber, etc.
+      - This includes odometerReading, greenCardNumber, validDateGreenCard.
+    allowedPathPrefixes:
       - vatDeduction
       - carBrand
       - carModel
@@ -30,44 +50,46 @@ steps:
       - validDateGreenCard
       - allRiskInsurance
 
-  driver-a:
+  driver-info-a:
     hints: |
-      - The user is on THEIR OWN driver and damage tab (Fahrer A).
-      - ALL spoken driver personal data goes to driver* fields (driverName, driverSurName, etc.).
-      - ALL spoken damage info goes to damageType, driverDamagedParts, damageDescription, etc.
+      - The user is on THEIR OWN driver info tab (Fahrer A).
+      - ALL spoken driver personal data goes to driver* fields (driverName, driverSurName, driverDriverLicense, etc.).
       - If the speaker says they drove themselves, also fill driver* personal fields.
       - Do NOT use otherDriver* fields here.
     allowedPathPrefixes:
       - driver
+
+  damage-location-a:
+    hints: |
+      - The user is on the damage location tab for their own vehicle.
+      - driverDamagedParts is a multi-selection of damaged parts.
+    allowedPathPrefixes:
+      - driverDamagedParts
+
+  damage-description-a:
+    hints: |
+      - The user is on the damage description tab for their own vehicle.
+      - damageDescription, damageType, additionalComments, vehicleOperational.
+    allowedPathPrefixes:
       - damageDescription
       - additionalComments
       - vehicleOperational
       - damageType
 
-  injuredDetails:
+  personal-info-b:
     hints: |
-      - The user is on the injured persons tab.
-      - hasInjured (tri-state) and injuredCount (count as string).
-    allowedPathPrefixes:
-      - hasInjured
-      - injuredCount
-
-  miscellaneousDamages:
-    hints: |
-      - The user is on the other property damage tab.
-      - miscellaneousDamages (tri-state) and miscellaneousDamageDescription.
-    allowedPathPrefixes:
-      - miscellaneousDamages
-      - miscellaneousDamageDescription
-
-  insurance-holder-b:
-    hints: |
-      - The user is on the OTHER PARTY's personal info and vehicle tab (Unfallbeteiligte:r B / Versicherungsnehmer B).
+      - The user is on the OTHER PARTY's personal info tab (Unfallbeteiligte:r B / Versicherungsnehmer B).
       - ALL spoken personal data (name, address, phone, email) goes to otherInsuranceHolder* fields.
-      - ALL spoken vehicle/insurance data goes to otherCarBrand, otherCarModel, otherLicensePlate, otherInsuranceCompany, otherInsuranceNumber, etc.
-      - Do NOT use insuranceHolder* or driver* fields here — everything on this tab is about the other party.
+      - Do NOT use insuranceHolder* fields here — everything on this tab is about the other party.
     allowedPathPrefixes:
       - otherInsuranceHolder
+
+  vehicle-info-b:
+    hints: |
+      - The user is on the OTHER PARTY's vehicle info tab.
+      - ALL spoken vehicle/insurance data goes to otherCarBrand, otherCarModel, otherLicensePlate, otherInsuranceCompany, otherInsuranceNumber, etc.
+      - This includes otherOdometerReading, otherGreenCardNumber, otherValidDateGreenCard.
+    allowedPathPrefixes:
       - otherVatDeduction
       - otherCarBrand
       - otherCarModel
@@ -80,20 +102,48 @@ steps:
       - otherValidDateGreenCard
       - otherAllRiskInsurance
 
-  driver-b:
+  driver-info-b:
     hints: |
-      - The user is on the OTHER PARTY's driver and damage tab (Fahrer B / Unfallgegner).
+      - The user is on the OTHER PARTY's driver info tab (Fahrer B / Unfallgegner).
       - ALL spoken driver personal data goes to otherDriver* fields (otherDriverName, otherDriverSurName, etc.).
-      - ALL spoken damage info goes to otherDamageType, otherDriverDamagedParts, otherDamageDescription, etc.
       - Do NOT use driver* or insuranceHolder* fields here — everything on this tab is about the other party.
     allowedPathPrefixes:
       - otherDriver
+
+  damage-location-b:
+    hints: |
+      - The user is on the damage location tab for the other party's vehicle.
+      - otherDriverDamagedParts is a multi-selection of damaged parts.
+    allowedPathPrefixes:
+      - otherDriverDamagedParts
+
+  damage-description-b:
+    hints: |
+      - The user is on the damage description tab for the other party's vehicle.
+      - otherDamageDescription, otherDamageType, otherAdditionalComments, otherVehicleOperational.
+    allowedPathPrefixes:
       - otherDamageDescription
       - otherAdditionalComments
       - otherVehicleOperational
       - otherDamageType
 
-  witness:
+  injured-persons:
+    hints: |
+      - The user is on the injured persons tab.
+      - hasInjured (tri-state) and injuredCount (count as string).
+    allowedPathPrefixes:
+      - hasInjured
+      - injuredCount
+
+  miscellaneous-damages:
+    hints: |
+      - The user is on the other property damage tab.
+      - miscellaneousDamages (tri-state) and miscellaneousDamageDescription.
+    allowedPathPrefixes:
+      - miscellaneousDamages
+      - miscellaneousDamageDescription
+
+  witnesses:
     hints: |
       - The user is on the witnesses tab.
       - Zeugen: hasWitnesses, witnessesCount, witnesses[] with flat fields per witness (salutation, name, surName, etc.).
