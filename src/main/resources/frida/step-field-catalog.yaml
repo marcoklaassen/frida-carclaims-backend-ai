@@ -56,8 +56,20 @@ steps:
       - ALL spoken driver personal data goes to driver* fields (driverName, driverSurName, driverDriverLicense, etc.).
       - If the speaker says they drove themselves, also fill driver* personal fields.
       - Do NOT use otherDriver* fields here.
+      - Do NOT fill driverDamagedParts or driverFileUploads here — those belong to damage-location-a / damage-description-a.
     allowedPathPrefixes:
-      - driver
+      - driverSalutation
+      - driverName
+      - driverSurName
+      - driverStreetName
+      - driverHouseNumber
+      - driverPostalCode
+      - driverCity
+      - driverTelephone
+      - driverEmail
+      - driverDriverLicense
+      - driverLicenseIssuingAuthority
+      - isInsuredDriver
 
   damage-location-a:
     hints: |
@@ -107,8 +119,20 @@ steps:
       - The user is on the OTHER PARTY's driver info tab (Fahrer B / Unfallgegner).
       - ALL spoken driver personal data goes to otherDriver* fields (otherDriverName, otherDriverSurName, etc.).
       - Do NOT use driver* or insuranceHolder* fields here — everything on this tab is about the other party.
+      - Do NOT fill otherDriverDamagedParts or otherDriverFileUploads here — those belong to damage-location-b / damage-description-b.
     allowedPathPrefixes:
-      - otherDriver
+      - otherDriverSalutation
+      - otherDriverName
+      - otherDriverSurName
+      - otherDriverStreetName
+      - otherDriverHouseNumber
+      - otherDriverPostalCode
+      - otherDriverCity
+      - otherDriverTelephone
+      - otherDriverEmail
+      - otherDriverDriverLicense
+      - otherDriverLicenseIssuingAuthority
+      - otherIsInsuredDriver
 
   damage-location-b:
     hints: |

@@ -84,9 +84,11 @@ public class AssistantTurnService {
 
         if (questionResponse.driverSameAsHolder()) {
             copyHolderToDriver(currentState);
+            currentState.setIsInsuredDriver("true");
         }
         if (questionResponse.otherDriverSameAsHolder()) {
             copyOtherHolderToOtherDriver(currentState);
+            currentState.setOtherIsInsuredDriver("true");
         }
 
         String audioUrl = null;
@@ -275,6 +277,10 @@ public class AssistantTurnService {
         data.setOtherAllRiskInsurance(tempAllRiskInsurance);
 
         // Driver fields (String)
+        String tempIsInsuredDriver = data.getIsInsuredDriver();
+        data.setIsInsuredDriver(data.getOtherIsInsuredDriver());
+        data.setOtherIsInsuredDriver(tempIsInsuredDriver);
+
         String tempDriverSalutation = data.getDriverSalutation();
         data.setDriverSalutation(data.getOtherDriverSalutation());
         data.setOtherDriverSalutation(tempDriverSalutation);

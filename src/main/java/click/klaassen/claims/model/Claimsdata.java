@@ -83,6 +83,7 @@ public class Claimsdata {
     private TriState otherAllRiskInsurance;
 
     // --- Driver A ---
+    private String isInsuredDriver;
     private String driverSalutation;
     private String driverName;
     private String driverSurName;
@@ -101,6 +102,7 @@ public class Claimsdata {
     private String damageType;
 
     // --- Driver B ---
+    private String otherIsInsuredDriver;
     private String otherDriverSalutation;
     private String otherDriverName;
     private String otherDriverSurName;
@@ -292,6 +294,9 @@ public class Claimsdata {
     public TriState getOtherAllRiskInsurance() { return otherAllRiskInsurance; }
     public void setOtherAllRiskInsurance(TriState otherAllRiskInsurance) { this.otherAllRiskInsurance = otherAllRiskInsurance; }
 
+    public String getIsInsuredDriver() { return isInsuredDriver; }
+    public void setIsInsuredDriver(String isInsuredDriver) { this.isInsuredDriver = isInsuredDriver; }
+
     public String getDriverSalutation() { return driverSalutation; }
     public void setDriverSalutation(String driverSalutation) { this.driverSalutation = driverSalutation; }
 
@@ -339,6 +344,9 @@ public class Claimsdata {
 
     public String getDamageType() { return damageType; }
     public void setDamageType(String damageType) { this.damageType = damageType; }
+
+    public String getOtherIsInsuredDriver() { return otherIsInsuredDriver; }
+    public void setOtherIsInsuredDriver(String otherIsInsuredDriver) { this.otherIsInsuredDriver = otherIsInsuredDriver; }
 
     public String getOtherDriverSalutation() { return otherDriverSalutation; }
     public void setOtherDriverSalutation(String otherDriverSalutation) { this.otherDriverSalutation = otherDriverSalutation; }
