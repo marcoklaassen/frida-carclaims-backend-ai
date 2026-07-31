@@ -3,8 +3,10 @@ package click.klaassen.api;
 import click.klaassen.service.AssistantTurnService;
 import click.klaassen.service.TtsAudioCache;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -30,7 +32,7 @@ public class AssistantTurnResource {
     @Path("/turn")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response turn(
+    public AssistantTurnResponse turn(
             @RestForm("audio") FileUpload audio,
             @RestForm("currentState") String currentState,
             @RestForm("conversationHistory") String conversationHistory,
@@ -38,9 +40,7 @@ public class AssistantTurnResource {
             @RestForm("previousQuestion") String previousQuestion) throws IOException {
 
         if (currentState == null || currentState.isBlank()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\":\"Missing required currentState\"}")
-                    .build();
+            throw new BadRequestException("Missing required currentState");
         }
 
         byte[] audioBytes = null;
@@ -50,11 +50,9 @@ public class AssistantTurnResource {
             mimeType = audio.contentType() != null ? audio.contentType() : "audio/webm";
         }
 
-        AssistantTurnResponse response = assistantTurnService.processTurn(
+        return assistantTurnService.processTurn(
                 audioBytes, mimeType, currentState,
                 conversationHistory, previousStepKey, previousQuestion);
-
-        return Response.ok(response).build();
     }
 
     @GET
