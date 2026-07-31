@@ -103,8 +103,10 @@ public class AssistantTurnService {
                 + " chars, nextStep=" + questionResponse.stepKey()
                 + ", done=" + questionResponse.done());
 
-        String navigateTo = STEP_KEY_TO_ROUTE.getOrDefault(
-                questionResponse.stepKey(), questionResponse.navigateTo());
+        String stepKey = questionResponse.stepKey();
+        String navigateTo = stepKey != null
+                ? STEP_KEY_TO_ROUTE.getOrDefault(stepKey, questionResponse.navigateTo())
+                : questionResponse.navigateTo();
 
         return new AssistantTurnResponse(
                 questionResponse.question(),
